@@ -1,0 +1,25 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY apps/api ./apps/api
+COPY packages ./packages
+COPY scripts/build-api.mjs ./scripts/build-api.mjs
+RUN node scripts/build-api.mjs
+
+FROM node:24-alpine AS dependencies
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+FROM node:24-alpine
+WORKDIR /app
+ARG RELEASE_REVISION
+LABEL org.opencontainers.image.revision=$RELEASE_REVISION
+ENV NODE_ENV=production
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/package.json ./package.json
+COPY --from=build /app/apps/api/dist ./dist
+USER node
+EXPOSE 3001
+CMD ["node", "dist/main.js"]

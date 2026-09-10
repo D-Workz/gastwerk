@@ -1,0 +1,115 @@
+.waiter-workspace button,
+.waiter-workspace input,
+.waiter-workspace select,
+.waiter-workspace summary {
+  min-height: 48px;
+  min-width: 48px;
+}
+.waiter-workspace [hidden] {
+  display: none;
+}
+.waiter-workspace .workspace-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper, #fff);
+  padding: 12px 0;
+}
+.waiter-workspace .order-handle {
+  margin-left: auto;
+}
+.waiter-workspace .choice-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.waiter-workspace .choice-tiles button {
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+.waiter-workspace button[aria-pressed="true"] {
+  border: 3px solid currentColor;
+  font-weight: bold;
+}
+.waiter-workspace button:focus-visible,
+.waiter-workspace textarea:focus-visible {
+  outline: 3px solid #245fcc;
+  outline-offset: 3px;
+}
+.quantity-control {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.quantity-control output {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+.waiter-workspace .inline-note {
+  margin: 12px 0;
+}
+.waiter-workspace .inline-note textarea {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+}
+.waiter-workspace .order > div {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 24px;
+}
+@media (max-width: 600px) {
+  .waiter-workspace .order-handle {
+    width: 100%;
+  }
+  .waiter-workspace .choice-tiles {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1050px) {
+  .waiter-workspace[data-screen="menu"] {
+    padding-right: 156px;
+  }
+  .waiter-workspace .order-handle {
+    position: fixed;
+    right: max(28px, calc((100vw - 1544px) / 2));
+    top: 45vh;
+    width: 140px;
+    min-height: 96px;
+    white-space: normal;
+    box-shadow: 0 3px 12px #24352d22;
+  }
+}
+
+@media (max-width: 600px) {
+  .waiter-workspace[data-screen="menu"] {
+    padding-bottom: 90px;
+  }
+  .waiter-workspace .order-handle {
+    position: fixed;
+    bottom: 12px;
+    left: 14px;
+    width: calc(100% - 28px);
+    background: #265c40;
+    color: white;
+    box-shadow: 0 3px 12px #24352d33;
+  }
+}
+
+.waiter-workspace .customizer {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
