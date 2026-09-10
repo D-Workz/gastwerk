@@ -2,7 +2,7 @@
 
 A single-venue restaurant application with persistent ingredient inventory, recipes, configurable ordering, kitchen/bar queues and service history. German is the default language; English is available. Order values are informational: closing an order does not record a payment or issue a fiscal receipt.
 
-The business baseline is [spec.md](../instructions/milestone1.md); the active waiter workflow milestone is [Milestone2.md](../instructions/Milestone2.md). See [milestone status](docs/milestone-status.md) for verification and limitations. The project is licensed under the [MIT License](LICENSE).
+The project is licensed under the [MIT License](LICENSE).
 
 ## How the project fits together
 
@@ -145,14 +145,6 @@ Start with the [API application guide](apps/api/README.md) or [browser applicati
 - **Connection failure after sending:** no success is implied. Use Retry; the same idempotency key retrieves the original result if the server already committed it. Retry metadata survives refresh in that tab.
 - **Negative stock:** preparation is allowed by policy. A manager should append a correction with a reason after checking physical stock.
 - **Port conflict:** stop the process using the documented port or consistently change Compose ports, origins and development proxy settings. The sibling portfolio uses port 5174; reserve 5173 for this application. After a failed Docker port bind, use `docker compose up -d --force-recreate web` once the port is free: simply starting the failed container may leave it without a network attachment.
-
-## Milestone two waiter workflow
-
-Tables → Menu → size/preparation tiles → Order. The last required choice saves an unsent item; Send order remains explicit. Order starts collapsed, notes edit inline, and One more repeats the exact configuration into unsent work. Current recipe/price changes require review. German and English flows use the same controls.
-
-Startup applies migration 2 without resetting data. Existing products keep their recipes/prices and receive empty sizes; untouched legacy demo choice labels receive short translated tile names. The seed adds `apple-sizes-demo` with explicit demonstration quantities/prices. Configure actual serving sizes through the manager's Advanced record editor using [these examples](docs/configuration.md#serving-sizes-milestone-two). Historical snapshots and consumed stock remain unchanged.
-
-See [frontend boundaries](docs/architecture.md#milestone-two-frontend-boundaries), [role workflows](docs/users.md), [API additions](docs/api.md#milestone-two-additions), and the [milestone two verification record](docs/milestone2-status.md).
 
 ## Deployment and configurable local ports
 
