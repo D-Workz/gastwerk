@@ -1,7 +1,7 @@
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Unit tests for API deployment environment parsing. Temporary secret files
+ * exercise credential encoding and rejected configurations; this suite neither
+ * connects to a database nor deploys the application.
  */
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";

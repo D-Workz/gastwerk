@@ -1,3 +1,8 @@
+/**
+ * Browser component tests for waiter selection, customization, and presentation.
+ * Fixtures and mocked mutations/fetch isolate UI behavior from the API and
+ * PostgreSQL; shared DOM setup is provided by tests/setup.ts.
+ */
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -262,8 +267,10 @@ it.each(["de", "en"] as const)(
         },
       ],
     });
+
     const translate = (key: keyof typeof messages.en) =>
       messages[language][key];
+
     render(
       <ChoiceSteps
         product={sized}

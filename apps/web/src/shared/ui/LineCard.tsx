@@ -1,3 +1,8 @@
+/**
+ * Order-line presentation shared by waiter Order and preparation Station.
+ * LineCard displays the saved snapshot and state-dependent controls, sending
+ * transition requests with the displayed revision through the supplied Mutate.
+ */
 import { unitLabel } from "../i18n/i18n";
 import { useState } from "react";
 import {
@@ -34,6 +39,7 @@ export function LineCard({
 }) {
   const [reason, setReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
   async function change(state: State) {
     setBusy(true);
     try {
@@ -49,6 +55,7 @@ export function LineCard({
       setBusy(false);
     }
   }
+
   return (
     <article className={`line ${line.state}`} data-testid={`line-${line.id}`}>
       <div className="row between">

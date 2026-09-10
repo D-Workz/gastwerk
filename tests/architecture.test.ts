@@ -1,24 +1,13 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Static frontend import checks for cycles and shared-to-feature dependencies.
+ * The graph is built from regex-matched relative from clauses under web/src;
+ * it does not model every import form or establish overall architecture quality.
  */
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve, relative } from "node:path";
 import { expect, it } from "vitest";
 
 const root = resolve("apps/web/src");
-
-/**
-
- * files - brief description
-
- * @param directory -
-
- * @returns
-
- */
 
 function files(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) =>
@@ -51,12 +40,7 @@ it("keeps frontend imports acyclic and shared modules independent of features", 
         ),
       ).toBe(true);
   }
-  /**
-   * visit - brief description
-   * @param file -
-   * @param stack -
-   * @returns
-   */
+
   function visit(file: string, stack: string[]) {
     expect(
       stack,
@@ -65,5 +49,6 @@ it("keeps frontend imports acyclic and shared modules independent of features", 
     for (const dependency of graph.get(file) ?? [])
       visit(dependency, [...stack, file]);
   }
+
   for (const file of graph.keys()) visit(file, []);
 });

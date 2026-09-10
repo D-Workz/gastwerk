@@ -1,7 +1,7 @@
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Pure catalog calculation tests using shared schema fixtures and policies.
+ * The API resolver is exercised directly for units, recipes, choices, pricing,
+ * and serving sizes, without HTTP requests or database persistence.
  */
 import { describe, expect, it } from "vitest";
 import { convert, resolve } from "../apps/api/src/catalog/resolve";
@@ -11,6 +11,7 @@ import {
   ingredientSchema,
   productSchema,
 } from "../packages/contracts/src/index";
+
 const n = { de: "Zutat", en: "Ingredient" };
 const ingredients = [
   ingredientSchema.parse({

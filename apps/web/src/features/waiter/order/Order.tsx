@@ -1,3 +1,8 @@
+/**
+ * Order view within Service, composing shared LineCard and InlineNote for each
+ * visible item. Service owns send, close, repeat, and decrement orchestration;
+ * this view presents those actions alongside totals from server state.
+ */
 import type {
   Line,
   Order as OrderRecord,

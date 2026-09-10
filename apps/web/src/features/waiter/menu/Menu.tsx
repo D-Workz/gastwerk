@@ -1,3 +1,8 @@
+/**
+ * Product browser within Service, with search, category, and favorites filters.
+ * The catalog helper selects visible products; add/edit callbacks return control
+ * to Service, and preference changes are passed to the application shell.
+ */
 import { visibleProducts } from "./catalog";
 import { useState } from "react";
 import {
@@ -8,6 +13,7 @@ import {
 import { Field } from "../../../../../../packages/ui/src/index";
 import type { AppState } from "../../../shared/api/api";
 import { euro, type Language, type T } from "../../../shared/i18n/i18n";
+
 type Props = {
   state: AppState;
   language: Language;

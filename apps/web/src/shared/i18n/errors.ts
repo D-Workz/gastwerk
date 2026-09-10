@@ -1,18 +1,11 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Shared mapping from API failures to browser translation keys. App, mutation
+ * handling, and feature views use errorMessage to present localized failures
+ * without displaying raw server error messages.
  */
 import { ApiError } from "../api/api";
 import type { T } from "./i18n";
 
-/* --- Public API --- */
-
-
-/**
- * errorMessage - exported function
- */
 export function errorMessage(error: unknown, t: T): string {
   if (!(error instanceof ApiError)) return t("requestError");
   if (error.status === 0 || error.status >= 500) return t("connectionError");

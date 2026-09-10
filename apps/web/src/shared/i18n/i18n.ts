@@ -1,14 +1,7 @@
-/* @copilot-fully-annotated */
-
-/* --- Public API --- */
-
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
- */
 /**
- * messages - exported symbol
+ * German/English UI messages and display formatters shared by the web features.
+ * App selects the language and supplies T; currency, quantities, and dates are
+ * formatted here for display, with dates fixed to the Europe/Vienna time zone.
  */
 export const messages = {
   de: {
@@ -346,18 +339,12 @@ export const messages = {
 export type Language = keyof typeof messages;
 export type T = (key: keyof typeof messages.en) => string;
 
-/**
- * euro - exported symbol
- */
 export const euro = (value: string, lang: Language) =>
   new Intl.NumberFormat(lang === "de" ? "de-AT" : "en-IE", {
     style: "currency",
     currency: "EUR",
   }).format(Number(value));
 
-/**
- * date - exported symbol
- */
 export const date = (value: string, lang: Language) =>
   new Intl.DateTimeFormat(lang === "de" ? "de-AT" : "en-GB", {
     dateStyle: "short",
@@ -365,17 +352,11 @@ export const date = (value: string, lang: Language) =>
     timeZone: "Europe/Vienna",
   }).format(new Date(value));
 
-/**
- * quantity - exported symbol
- */
 export const quantity = (value: string, lang: Language) =>
   new Intl.NumberFormat(lang === "de" ? "de-AT" : "en-IE", {
     maximumFractionDigits: 3,
   }).format(Number(value));
 
-/**
- * unitLabel - exported function
- */
 export function unitLabel(unit: string, language: Language): string {
   if (unit === "piece") return language === "de" ? "Stück" : "piece";
   if (unit === "pack") return language === "de" ? "Packung" : "pack";

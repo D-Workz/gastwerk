@@ -1,12 +1,12 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Manual persistence smoke check against the running local Compose application.
+ * It creates a marked draft on table 2, restarts Compose, and compares state
+ * before cancelling that draft. Execution changes application data and leaves history.
  */
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import type { AppState } from "../apps/web/src/shared/api/api";
+
 const base = "http://localhost:5173/api";
 let cookie = "";
 
@@ -60,17 +60,14 @@ const after = await request<AppState>("/state");
 assert.deepEqual(after.balances, before.balances);
 assert.deepEqual(after.configuration, before.configuration);
 assert.deepEqual(after.lines, before.lines);
-/**
- * line - brief description
- * @param after.lines.find((l) -
- * @returns
- */
+
 const line = after.lines.find((l) => l.id === added.id)!;
 await request(`/lines/${line.id}/transition`, {
   version: line.version,
   state: "cancelled",
   reason: "Completed Compose persistence verification",
 });
+// Close only if the pre-cleanup snapshot shows no other unfinished items.
 const orderLines = after.lines.filter(
   (l) => l.orderId === line.orderId && l.id !== line.id,
 );

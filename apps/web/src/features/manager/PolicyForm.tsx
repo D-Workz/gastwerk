@@ -1,7 +1,16 @@
+/**
+ * Structured policy fields within the manager JSON editor. PolicyForm parses
+ * the editor value with the shared policy schema and emits JSON changes;
+ * Manager owns submission and the configuration revision.
+ */
 import { Field } from "../../../../../packages/ui/src/index";
 import { policySchema } from "../../../../../packages/config/src/index";
 import type { T } from "../../shared/i18n/i18n";
 
+/**
+ * Render only valid policy JSON. Field updates serialize the parsed policy,
+ * including schema defaults, back to the parent editor.
+ */
 export function PolicyForm({
   value,
   onChange,
@@ -20,9 +29,11 @@ export function PolicyForm({
   const parsed = policySchema.safeParse(raw);
   if (!parsed.success) return null;
   const policy = parsed.data;
+
   function update(patch: object) {
     onChange(JSON.stringify({ ...policy, ...patch }, null, 2));
   }
+
   return (
     <div className="form-grid">
       <Field label={t("rounding")}>

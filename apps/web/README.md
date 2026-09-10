@@ -14,6 +14,6 @@ Create a new meaningful feature under `src/features/`, export its public composi
 
 ## Runtime and checks
 
-Run commands from `codex/`, not this directory. `npm run dev:web` uses [vite.config.ts](vite.config.ts) and proxies `/api` to the API; follow [local setup](../../README.md#develop-locally). `npm run build` performs TypeScript checks and outputs `apps/web/dist/`. [Dockerfile](Dockerfile) builds static assets and serves them with [nginx.conf](nginx.conf); `/api/` is proxied and other paths fall back to `index.html`.
+Run commands from `gastwerk/`, not this directory. `npm run dev:web` uses [vite.config.ts](vite.config.ts) and proxies `/api` to the API; follow [local setup](../../README.md#develop-locally). `npm run build` performs TypeScript checks and outputs `apps/web/dist/`. [Dockerfile](Dockerfile) builds static assets and serves them with [nginx.conf](nginx.conf); `/api/` is proxied and other paths fall back to `index.html`.
 
 `npm test` covers components, notes, the import graph and domain behavior without PostgreSQL. `npm run test:e2e` requires Chromium and the fixed isolated `venue_e2e` database; setup drops that test schema, so it is not a harmless live-site smoke check. See [test prerequisites](../../README.md#tests-and-checks) and [executed checks](../../docs/milestone-3-review.md#verification). The regex-based graph test checks relative static imports inside web/src for cycles and shared-to-feature dependencies; it does not enforce every intended boundary or all possible import forms.

@@ -1,3 +1,8 @@
+/**
+ * Structured catalog fields within the manager JSON editor. This component
+ * reads ingredient, product, or table records and emits updated JSON to Manager;
+ * its local shape checks support rendering and do not replace API validation.
+ */
 import { unitLabel } from "../../shared/i18n/i18n";
 import { z } from "zod";
 import {
@@ -9,6 +14,7 @@ import {
 import { Field } from "../../../../../packages/ui/src/index";
 import type { AppState } from "../../shared/api/api";
 import type { Language, T } from "../../shared/i18n/i18n";
+
 type Props = {
   kind: "ingredient" | "product" | "table";
   value: string;
@@ -19,7 +25,10 @@ type Props = {
   existing: boolean;
 };
 
-/** Structured common fields share the same record contract as the advanced editor. */
+/**
+ * Return no fields while JSON is invalid or fails the local rendering schema.
+ * Updates merge into the original record so advanced fields remain in the JSON.
+ */
 export function CatalogForm({
   kind,
   value,
@@ -84,8 +93,10 @@ export function CatalogForm({
   }
   if (!schema.safeParse(raw).success) return null;
   const record = raw as Ingredient | Product | Table;
+
   const update = (patch: object) =>
     onChange(JSON.stringify({ ...record, ...patch }, null, 2));
+
   return (
     <div className="catalog-form">
       <div className="form-grid">

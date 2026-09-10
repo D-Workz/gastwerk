@@ -1,8 +1,8 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Preview state for the waiter customization flow. Customizer uses this hook to
+ * display server-calculated prices and ingredients before confirming an item.
+ * Requests go through the feature's api.ts; this hook owns debounce timing,
+ * stale-response handling, and the loading/error/retry state consumed by the UI.
  */
 import { useEffect, useState } from "react";
 import type {
@@ -13,10 +13,11 @@ import { errorMessage } from "../../../shared/i18n/errors";
 import type { T } from "../../../shared/i18n/i18n";
 import { previewCustomization } from "./api";
 
-/* --- Public API --- */
-
-
-/** Ignore stale responses after an edit or unmount; only the latest preview enables Save. */
+/**
+ * Keep input identity stable between edits and replace the object when editing:
+ * loading and snapshot visibility compare the result's input by reference.
+ * Retry clears the displayed result and schedules another request.
+ */
 export function usePreview(
   input: Customization,
   lineId: string | undefined,
@@ -28,13 +29,10 @@ export function usePreview(
     error: unknown;
   } | null>(null);
   const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
     let current = true;
-    /**
-     * timeout - brief description
-     * @param setTimeout(() -
-     * @returns
-     */
+    // Coalesce edits made within the debounce window into one preview request.
     const timeout = setTimeout(() => {
       void previewCustomization(input, lineId)
         .then((snapshot) => {
@@ -44,12 +42,16 @@ export function usePreview(
           if (current) setResult({ input, snapshot: null, error });
         });
     }, 180);
+
     return () => {
+      // Ignore an in-flight response after cleanup; the request itself is not aborted.
       current = false;
       clearTimeout(timeout);
     };
   }, [input, lineId, attempt]);
+
   const loading = result?.input !== input;
+
   return {
     snapshot: loading ? null : (result?.snapshot ?? null),
     loading,

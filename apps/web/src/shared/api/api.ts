@@ -1,8 +1,7 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Shared browser transport and application-state/mutation interfaces. App and
+ * feature adapters use api to reach same-origin /api routes; ApiError supplies
+ * HTTP failure metadata to localized error and retry handling.
  */
 import type { Policy } from "../../../../../packages/config/src/index";
 import type {
@@ -15,8 +14,6 @@ import type {
   User,
 } from "../../../../../packages/contracts/src/index";
 
-/* --- Public API --- */
-
 export type AppState = {
   user: User;
   ingredients: (Ingredient & { version: number })[];
@@ -28,8 +25,9 @@ export type AppState = {
   balances: Record<string, string>;
   history: History[];
 };
+
 /**
- * ApiError - class
+ * HTTP failure metadata; status 0 represents a fetch failure without a response.
  */
 export class ApiError extends Error {
   constructor(
@@ -43,7 +41,9 @@ export class ApiError extends Error {
 }
 
 /**
- * api - exported function
+ * A body selects POST; omitting it selects GET. Successful JSON is trusted as T
+ * without runtime schema validation. Fetch failures become ApiError status 0;
+ * JSON decoding failures propagate separately from HTTP ApiError responses.
  */
 export async function api<T>(
   path: string,

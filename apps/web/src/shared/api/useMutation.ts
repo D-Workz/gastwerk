@@ -1,16 +1,13 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Mutation queue and retry state shared by the browser features through App.
+ * This hook calls api, refreshes application state, and stores an unacknowledged
+ * operation in per-user sessionStorage so Retry can reuse its request key.
  */
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { errorMessage } from "../i18n/errors";
 import type { T } from "../i18n/i18n";
 import { api, ApiError, type MutationResult } from "./api";
-
-/* --- Public API --- */
 
 const operationSchema = z.object({
   path: z.string().startsWith("/"),
@@ -19,7 +16,11 @@ const operationSchema = z.object({
 });
 type Operation = z.infer<typeof operationSchema>;
 
-/** A retry resolves the original caller, so a customized item cannot be added twice after a lost response. */
+/**
+ * An unacknowledged mutation keeps its caller pending until Retry gets a final
+ * result. The same request key is reused; server handling owns deduplication.
+ * Restored sessionStorage operations do not restore callbacks across a reload.
+ */
 export function useMutation(
   userId: string | undefined,
   refresh: () => Promise<void>,
@@ -29,12 +30,7 @@ export function useMutation(
 ) {
   const [pending, setPending] = useState<Operation | null>(null),
     [busy, setBusy] = useState(false);
-  /**
-   * callbacks - brief description
-   * @param useRef(new -
-   * @param (result -
-   * @returns
-   */
+
   const callbacks = useRef(new Map<string, (result: MutationResult) => void>());
   const pendingRef = useRef<Operation | null>(null);
   const lock = useRef(false),
@@ -54,11 +50,7 @@ export function useMutation(
       sessionStorage.removeItem(storageKey);
     }
   }, [storageKey]);
-  /**
-   * retain - brief description
-   * @param operation -
-   * @returns
-   */
+
   function retain(operation: Operation | null) {
     pendingRef.current = operation;
     setPending(operation);
@@ -68,10 +60,10 @@ export function useMutation(
       else sessionStorage.removeItem(storageKey);
     }
   }
+
   /**
-   * execute - brief description
-   * @param operation -
-   * @returns
+   * Return null for a retained transport/5xx failure, leaving resolution to Retry.
+   * Other handled failures refresh state and return false.
    */
   async function execute(operation: Operation): Promise<boolean | null> {
     if (lock.current) return false;
@@ -105,50 +97,21 @@ export function useMutation(
       setBusy(false);
     }
   }
+
   const queue = useRef<Promise<unknown>>(Promise.resolve());
 
   /**
-
-   * mutate - brief description
-
-   * @param path -
-
-   * @param body -
-
-   * @param onSuccess? -
-
-   * @returns
-
+   * Queue intentional actions so an earlier pending retry holds later actions.
    */
-
   function mutate(
     path: string,
     body: unknown,
     onSuccess?: (result: MutationResult) => void,
   ): Promise<boolean> {
-    /**
-     * next - brief description
-     * @param queue.current.then(() -
-     * @returns
-     */
     const next = queue.current.then(() => runMutation(path, body, onSuccess));
     queue.current = next.catch(() => false);
     return next;
   }
-
-  /**
-
-   * runMutation - brief description
-
-   * @param path -
-
-   * @param body -
-
-   * @param onSuccess? -
-
-   * @returns
-
-   */
 
   async function runMutation(
     path: string,
@@ -164,10 +127,7 @@ export function useMutation(
       resolvePending.current = resolve;
     });
   }
-  /**
-   * retry - brief description
-   * @returns
-   */
+
   async function retry() {
     if (!pending || lock.current) return;
     const result = await execute(pending);
@@ -176,5 +136,6 @@ export function useMutation(
       resolvePending.current = null;
     }
   }
+
   return { mutate, pending, busy, retry };
 }

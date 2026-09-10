@@ -1,3 +1,8 @@
+/**
+ * Inline note editor used by Order. Draft text and save/retry state live in
+ * useNotes so they can outlive this view; this component owns expansion,
+ * explicit amendment controls, and display of retained text on locked items.
+ */
 import { useState } from "react";
 import type { Line } from "../../../../../../packages/contracts/src/index";
 import type { T } from "../../../shared/i18n/i18n";

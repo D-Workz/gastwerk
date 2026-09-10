@@ -1,3 +1,8 @@
+/**
+ * Detailed item editor opened by Service for additions, edits, and replacements.
+ * It combines choice and ingredient controls with usePreview server snapshots,
+ * then submits the selected operation through the supplied mutation function.
+ */
 import { unitLabel } from "../../../shared/i18n/i18n";
 import { useRef, useState } from "react";
 import {
@@ -78,6 +83,7 @@ export function Customizer({
   const [review, setReview] = useState(false);
   const [split, setSplit] = useState(false);
   const [reason, setReason] = useState("");
+
   function edit(id: string, quantity: string, portionId?: string) {
     setInput((old) => ({
       ...old,
@@ -87,6 +93,7 @@ export function Customizer({
       ],
     }));
   }
+
   const quick =
     product.quick ??
     state.configuration.policy.categories.find((c) => c.id === product.category)
@@ -106,6 +113,11 @@ export function Customizer({
           .includes(search.toLowerCase()) &&
           (!category || i.category === category))),
   );
+
+  /**
+   * Require a preview and completed local review, then select add, edit, or
+   * replacement transport. Existing-line requests carry the displayed revision.
+   */
   async function confirm() {
     if (!snapshot || loading || review || savingRef.current) return;
     savingRef.current = true;
@@ -138,6 +150,7 @@ export function Customizer({
       onBusy?.(false);
     }
   }
+
   return (
     <section className="panel" aria-label={label(product.name, language)}>
       <h2 className="customizer-title" tabIndex={-1}>

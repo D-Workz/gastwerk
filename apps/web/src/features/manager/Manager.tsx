@@ -1,3 +1,8 @@
+/**
+ * Manager workspace composed by App for catalog, policy, inventory, and users.
+ * CatalogForm and PolicyForm edit the JSON held here; saves use the supplied
+ * mutation function, while supplemental lists use shared API transport.
+ */
 import { unitLabel } from "../../shared/i18n/i18n";
 import { errorMessage } from "../../shared/i18n/errors";
 import { PolicyForm } from "./PolicyForm";
@@ -15,6 +20,7 @@ import {
   type Language,
   type T,
 } from "../../shared/i18n/i18n";
+
 const templates = {
   ingredient: {
     id: "new-ingredient",
@@ -85,6 +91,7 @@ export function Manager({
         .then(setUsers)
         .catch((e: Error) => setError(errorMessage(e, t)));
   }, [tab, state]);
+
   function selectTab(next: typeof tab) {
     setTab(next);
     setSelected("");
@@ -96,6 +103,11 @@ export function Manager({
         : "",
     );
   }
+
+  /**
+   * Submit the editor with its captured revision; JSON parsing here does not
+   * validate catalog references or grant permission to save.
+   */
   async function save() {
     setError("");
     setBusy(true);
@@ -113,6 +125,7 @@ export function Manager({
       setBusy(false);
     }
   }
+
   const records =
     tab === "ingredient"
       ? state.ingredients

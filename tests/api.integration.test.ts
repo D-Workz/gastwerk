@@ -1,8 +1,7 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Fastify/PostgreSQL workflow tests using app.inject and seeded role sessions.
+ * Setup requires a connection string containing venue_test, and each test
+ * truncates operational tables. Run with the integration test configuration.
  */
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -12,25 +11,14 @@ import { migrate } from "../apps/api/src/persistence/migrate";
 import { seed } from "../apps/api/src/persistence/seed";
 import { bootstrapAdmin } from "../apps/api/src/deployment/bootstrap";
 import type { AppState } from "../apps/web/src/shared/api/api";
+
 const app = await buildApp();
 const cookies: Record<string, string> = {};
 
 /**
-
- * request - brief description
-
- * @param role -
-
- * @param path -
-
- * @param body? -
-
- * @param key -
-
- * @returns
-
+ * Inject a request with the selected role session. Pass an explicit key when
+ * testing retries; the default creates a distinct intentional request.
  */
-
 async function request(
   role: string,
   path: string,
@@ -50,29 +38,9 @@ async function request(
   });
 }
 
-/**
-
- * state - brief description
-
- * @returns
-
- */
-
 async function state() {
   return (await request("manager", "/state")).json<AppState>();
 }
-
-/**
-
- * add - brief description
-
- * @param product -
-
- * @param quantity -
-
- * @returns
-
- */
 
 async function add(product = "apple", quantity = 1) {
   const r = await request("waiter", "/lines", {
@@ -88,24 +56,6 @@ async function add(product = "apple", quantity = 1) {
   expect(r.statusCode).toBe(200);
   return r.json<{ id: string }>().id;
 }
-
-/**
-
- * transition - brief description
-
- * @param id -
-
- * @param version -
-
- * @param target -
-
- * @param role -
-
- * @param key -
-
- * @returns
-
- */
 
 async function transition(
   id: string,
@@ -360,17 +310,9 @@ describe("policy and historical invariants", () => {
   it("keeps existing pricing policy and archived ingredients when editing a note", async () => {
     const id = await add("burger");
     let s = await state();
-    /**
-     * original - brief description
-     * @param s.lines.find((l) -
-     * @returns
-     */
+
     const original = s.lines.find((l) => l.id === id)!;
-    /**
-     * ingredient - brief description
-     * @param s.ingredients.find((i) -
-     * @returns
-     */
+
     const ingredient = s.ingredients.find((i) => i.id === "onion")!;
     const { version, ...data } = ingredient;
     expect(
@@ -399,11 +341,7 @@ describe("policy and historical invariants", () => {
         .statusCode,
     ).toBe(200);
     s = await state();
-    /**
-     * edited - brief description
-     * @param s.lines.find((l) -
-     * @returns
-     */
+
     const edited = s.lines.find((l) => l.id === id)!;
     expect(edited.snapshot.unitPrice).toBe(original.snapshot.unitPrice);
     expect(edited.snapshot.policyVersion).toBe(original.snapshot.policyVersion);
@@ -495,11 +433,7 @@ describe("policy and historical invariants", () => {
 describe("milestone two repeat, size and note contracts", () => {
   it("counts concurrent intentional repeats across sessions and deduplicates retries", async () => {
     const id = await add();
-    /**
-     * line - brief description
-     * @param await -
-     * @returns
-     */
+
     const line = (await state()).lines.find((l) => l.id === id)!;
     const body = { input: line.input };
     const key = randomUUID();
@@ -524,11 +458,7 @@ describe("milestone two repeat, size and note contracts", () => {
     await transition(id, 1, "submitted");
     await transition(id, 2, "preparing", "bar");
     const before = await state();
-    /**
-     * source - brief description
-     * @param before.lines.find((l) -
-     * @returns
-     */
+
     const source = before.lines.find((l) => l.id === id)!;
     const body = { input: source.input };
     expect(
@@ -538,11 +468,7 @@ describe("milestone two repeat, size and note contracts", () => {
       (await request("waiter", `/lines/${id}/repeat`, body)).statusCode,
     ).toBe(200);
     let s = await state();
-    /**
-     * repeated - brief description
-     * @param s.lines.find((l) -
-     * @returns
-     */
+
     const repeated = s.lines.find((l) => l.id !== id)!;
     expect(repeated.input).toEqual({ ...source.input, quantity: 2 });
     expect(repeated.state).toBe("draft");
@@ -563,11 +489,7 @@ describe("milestone two repeat, size and note contracts", () => {
   it("requires review of changed prices and retains unlike notes and configurations", async () => {
     const id = await add("burger");
     const s = await state();
-    /**
-     * source - brief description
-     * @param s.lines.find((l) -
-     * @returns
-     */
+
     const source = s.lines.find((l) => l.id === id)!;
     await request("waiter", "/lines", {
       tableId: "t1",
@@ -577,11 +499,7 @@ describe("milestone two repeat, size and note contracts", () => {
     expect((await state()).lines.map((l) => l.input.quantity).sort()).toEqual([
       1, 2,
     ]);
-    /**
-     * product - brief description
-     * @param s.products.find((p) -
-     * @returns
-     */
+
     const product = s.products.find((p) => p.id === "burger")!;
     const { version, ...data } = product;
     try {
@@ -665,11 +583,7 @@ describe("milestone two repeat, size and note contracts", () => {
 it("migration two preserves commercial data and custom labels while normalizing legacy records", async () => {
   const id = await add();
   const before = await state();
-  /**
-   * product - brief description
-   * @param before.products.find((p) -
-   * @returns
-   */
+
   const product = before.products.find((p) => p.id === "apple")!;
   const legacy = {
     ...product,
@@ -695,11 +609,7 @@ it("migration two preserves commercial data and custom labels while normalizing 
   try {
     await migrate();
     const after = await state();
-    /**
-     * migrated - brief description
-     * @param after.products.find((p) -
-     * @returns
-     */
+
     const migrated = after.products.find((p) => p.id === "apple")!;
     expect(migrated.sizes).toEqual([]);
     expect(migrated.recipe).toEqual(product.recipe);

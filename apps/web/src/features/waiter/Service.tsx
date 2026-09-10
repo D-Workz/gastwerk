@@ -1,3 +1,8 @@
+/**
+ * Waiter workspace coordinator for tables, menu, customization, and orders.
+ * Service connects the child views to shared mutations and useNotes, and owns
+ * navigation guards, send/repeat actions, and the latest undo callback.
+ */
 import { useEffect, useRef, useState } from "react";
 import {
   withChoiceDefaults,
@@ -86,6 +91,7 @@ export function Service({
 
   useEffect(() => {
     registerGuard?.(() => guard.current());
+
     const back = (event: PopStateEvent) => {
       void guard.current().then((ok) => {
         if (ok) {
@@ -97,9 +103,11 @@ export function Service({
         } else window.history.pushState({}, "");
       });
     };
+
     const unload = (event: BeforeUnloadEvent) => {
       if (notes.hasPending()) event.preventDefault();
     };
+
     window.addEventListener("popstate", back);
     window.addEventListener("beforeunload", unload);
     return () => {
@@ -109,6 +117,9 @@ export function Service({
     };
   }, [registerGuard]);
 
+  /**
+   * Consult the current note/add guard before changing screens or browser history.
+   */
   async function navigate(next: Screen) {
     if (!(await guard.current())) return;
     if (screen === "menu") scroll.current = window.scrollY;
@@ -165,6 +176,10 @@ export function Service({
     await navigate("edit");
   }
 
+  /**
+   * Flush notes before repeating. Any false mutation result opens the review
+   * flow when the product is still present in the latest application state.
+   */
   async function repeat(line: Line) {
     const input = {
       ...line.input,

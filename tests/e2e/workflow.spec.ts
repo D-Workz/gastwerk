@@ -1,24 +1,15 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Playwright workflows spanning manager setup, waiter ordering, and preparation.
+ * Browser sessions exercise German/English flows, retries, and viewport layouts
+ * against the configured test services and the database reset by e2e/setup.ts.
  */
 import { expect, test, type Page } from "@playwright/test";
 import type { AppState } from "../../apps/web/src/shared/api/api";
 
 /**
-
- * login - brief description
-
- * @param page -
-
- * @param role -
-
- * @returns
-
+ * Seeded users restore their German preference at login; switch back to English
+ * after authentication so callers can use the English control labels.
  */
-
 async function login(page: Page, role: string) {
   await page.goto("/");
   await page.getByLabel("Sprache / Language").selectOption("en");
@@ -35,16 +26,6 @@ async function login(page: Page, role: string) {
     page.getByRole("button", { name: "Sign out", exact: true }),
   ).toBeVisible();
 }
-
-/**
-
- * state - brief description
-
- * @param page -
-
- * @returns
-
- */
 
 async function state(page: Page) {
   return (await page.request.get("/api/state")).json() as Promise<AppState>;

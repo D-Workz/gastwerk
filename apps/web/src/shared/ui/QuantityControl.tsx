@@ -1,3 +1,8 @@
+/**
+ * Controlled item-count buttons shared by the waiter choice and detail editors.
+ * The parent owns the value; buttons emit one-step changes within the configured
+ * minimum and the fixed upper bound of 100.
+ */
 import type { T } from "../i18n/i18n";
 
 type Props = {

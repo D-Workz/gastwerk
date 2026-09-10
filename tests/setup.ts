@@ -1,12 +1,15 @@
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Shared Vitest DOM setup for component and hook tests. It installs jest-dom
+ * matchers, cleans rendered trees between tests, and supplies minimal dialog
+ * methods that toggle the open attribute without emulating native modal behavior.
  */
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+
 afterEach(cleanup);
+
+// Attribute-only stubs: focus trapping and native dialog behavior need browser tests.
 HTMLDialogElement.prototype.showModal = function () {
   this.setAttribute("open", "");
 };

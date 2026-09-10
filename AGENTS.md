@@ -8,7 +8,7 @@ This file defines lasting engineering conventions. Product changes and acceptanc
 
 ## Repository orientation
 
-The application root for these instructions and commands is `codex/`, inside the outer Git repository. Begin with applicable parent instructions, the [onboarding README](README.md) and [architecture map](docs/architecture.md). Before changing a module, follow the map to its README, read any applicable local instructions, and inspect relevant implementation and tests. Select documentation by the active task; do not load every historical Markdown file indiscriminately.
+The application root for these instructions and commands is `gastwerk/`, a Git submodule pinned by the outer repository. Begin with applicable parent instructions, the [onboarding README](README.md) and [architecture map](docs/architecture.md). Before changing a module, follow the map to its README, read any applicable local instructions, and inspect relevant implementation and tests. Select documentation by the active task; do not load every historical Markdown file indiscriminately.
 
 Treat documentation as guidance to verify. Specifications describe requested behavior, source describes implemented behavior, and executed checks supply verification evidence. Identify disagreements before relying on a claim. The [Milestone 3 review](docs/milestone-3-review.md) records the orientation baseline and known gaps; it is not a permanent substitute for inspecting current code.
 
@@ -18,7 +18,7 @@ Before making changes, inspect package manifests, lockfiles, existing modules, A
 
 Establish the current test/build baseline and distinguish existing failures from regressions. Do not rebuild the application from scratch or reset user data.
 
-Repository commands below run from `codex/` (npm; root `package-lock.json`). Use [README prerequisites](README.md#tests-and-checks) and report which checks were executed for the current change; the command list itself is not evidence of a new test run:
+Repository commands below run from `gastwerk/` (npm; root `package-lock.json`). Use [README prerequisites](README.md#tests-and-checks) and report which checks were executed for the current change; the command list itself is not evidence of a new test run:
 
 - Install: `npm ci`; local services: `npm run dev:api`, `npm run dev:web`.
 - Database: `npm run db:migrate`, `npm run db:seed`; Docker: `docker compose up -d --build` (see README for ports and persistent volumes).

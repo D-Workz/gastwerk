@@ -1,3 +1,8 @@
+/**
+ * Guided size and preparation selection within the waiter workspace. Service
+ * opens this view for products with choices; the last selection submits an item
+ * through Mutate, and a failed save retains the selections for retry.
+ */
 import { useEffect, useRef, useState } from "react";
 import {
   label,
@@ -52,6 +57,10 @@ export function ChoiceSteps({
     heading.current?.focus();
   }, [step]);
 
+  /**
+   * Intermediate selections advance locally; the final step sends the item.
+   * The ref blocks additional submissions before React renders the busy state.
+   */
   async function choose(next: Customization) {
     if (lock.current) return;
     setInput(next);

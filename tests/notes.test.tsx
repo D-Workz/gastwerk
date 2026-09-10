@@ -1,3 +1,8 @@
+/**
+ * Waiter note lifecycle and shared mutation-queue tests in the DOM environment.
+ * Controlled promises and mocked transport exercise pending saves, explicit
+ * amendments, retained text, and reuse of a request key after a lost response.
+ */
 import { act, render, screen, renderHook } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InlineNote } from "../apps/web/src/features/waiter/order/InlineNote";
@@ -51,6 +56,7 @@ const line: Line = {
 };
 
 it("flush waits for an in-flight note and retains text after failure", async () => {
+  // Hold acknowledgement explicitly so save and flush overlap deterministically.
   let complete!: (ok: boolean) => void;
   const mutate = vi.fn(
     () =>
@@ -150,12 +156,14 @@ it("queues rapid intentional mutations and retries a lost response with the same
 
 it("retains entered text when preparation starts during a submitted note edit", async () => {
   const mutate = vi.fn().mockResolvedValue(false);
+
   function Note({ current }: { current: Line }) {
     const notes = useNotes(mutate);
     return (
       <InlineNote line={current} notes={notes} t={(key) => messages.en[key]} />
     );
   }
+
   const { rerender } = render(
     <Note current={{ ...line, state: "submitted" }} />,
   );

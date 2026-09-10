@@ -8,7 +8,7 @@ The toolset follows the official [Fastify TypeScript documentation](https://fast
 
 ## Repository and runtime entry points
 
-The Git root is the outer `gastro_app/`; the application command/configuration root is `codex/`. Run npm and Compose commands from `codex/`. The sibling portfolio is a separate project. The root [package manifest](../package.json) and lockfile own dependencies; workspace globs are declared, but the app/shared directories currently have no individual package manifests. Shared code is imported directly from source rather than published packages.
+The restaurant Git and application command/configuration root is `gastwerk/`, pinned as a submodule by outer `gastro_app/`. The outer repository owns production deployment and the portfolio. Run npm and Compose commands from `gastwerk/`. The sibling portfolio is a separate project. The root [package manifest](../package.json) and lockfile own dependencies; workspace globs are declared, but the app/shared directories currently have no individual package manifests. Shared code is imported directly from source rather than published packages.
 
 | Runtime          | Start here                                                                    | Relationship                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -136,6 +136,6 @@ Migration 2 adds empty `sizes` arrays to existing product documents and incremen
 
 ## Production deployment boundary
 
-The earlier startup table describes **local development Compose**. Root [production Compose](../../compose.production.yaml) is independent: external Traefik → non-root static restaurant Nginx on 8080 → private API on 3001 → private PostgreSQL 18 with stable persistent volume. Portfolio Nginx is a separate edge-network service. API/DB have no published host ports, app containers have no Docker socket, and no uploads directory was identified.
+The earlier startup table describes **local development Compose**. Root [deployment tooling](../../deploy/README.md) checks the source/submodule checkout and owns the two web image builds. Root [production Compose](../../compose.production.yaml) is independent: external Traefik → non-root static restaurant Nginx on 8080 → private API on 3001 → private PostgreSQL 18 with stable persistent volume. Portfolio Nginx is a separate edge-network service. API/DB have no published host ports, app containers have no Docker socket, and no uploads directory was identified.
 
 [Deployment initialization](../apps/api/src/deployment/README.md) owns production secret-file parsing and explicit migration/bootstrap entry points; it does not change business persistence rules. Normal API startup neither migrates nor seeds. The [web configuration generator](../../deploy/render-nginx.mjs) owns same-origin API proxying, scoped forwarding trust and exact iframe policies. The fixed gateway address is outside the dynamic private allocation range. [Deployment](../../docs/deployment.md) and [operations](../../docs/operations.md) own server configuration, Git release selection, backup and recovery behavior.

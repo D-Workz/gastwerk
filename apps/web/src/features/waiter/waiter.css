@@ -1,3 +1,8 @@
+/**
+ * Waiter workspace styles loaded by Service. Rules are scoped to
+ * .waiter-workspace and its child views, extending the global controls and
+ * layouts in style.css with navigation, choices, and order presentation.
+ */
 .waiter-workspace button,
 .waiter-workspace input,
 .waiter-workspace select,

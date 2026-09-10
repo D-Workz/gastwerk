@@ -84,7 +84,7 @@ npm run build
 
 ## Repository orientation
 
-For code changes, read [AGENTS.md](AGENTS.md), then the [architecture module index](docs/architecture.md#module-index) and the README for the affected module. The application command root is this `codex/` directory; the outer Git repository also contains a separate portfolio.
+For code changes, read [AGENTS.md](AGENTS.md), then the [architecture module index](docs/architecture.md#module-index) and the README for the affected module. The application command root is this `gastwerk/` directory; the outer Git repository also contains a separate portfolio.
 
 Start with the [API application guide](apps/api/README.md) or [browser application guide](apps/web/README.md). The [Milestone 3 review](docs/milestone-3-review.md) records inspected source/test routes, documentation discrepancies and checks actually executed. Historical milestone records remain dated evidence rather than proof of the current tree.
 

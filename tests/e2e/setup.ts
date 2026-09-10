@@ -1,13 +1,9 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Playwright database setup for the isolated venue_e2e environment. Execution
+ * drops and recreates its public schema, then runs application migration and
+ * seed entry points before browser workflows start.
  */
 import pg from "pg";
-
-/* --- Public API --- */
-
 
 export default async function setup() {
   const pool = new pg.Pool({

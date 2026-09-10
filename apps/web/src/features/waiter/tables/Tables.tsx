@@ -1,8 +1,14 @@
+/**
+ * Table selection view within Service. It projects active tables and open-order
+ * occupancy from AppState into list or map layouts; selection and persisted
+ * layout preferences are delegated to the supplied callbacks.
+ */
 import { useState } from "react";
 import { type Preferences } from "../../../../../../packages/contracts/src/index";
 import { Field } from "../../../../../../packages/ui/src/index";
 import type { AppState } from "../../../shared/api/api";
 import { type T } from "../../../shared/i18n/i18n";
+
 type Props = {
   state: AppState;
   t: T;

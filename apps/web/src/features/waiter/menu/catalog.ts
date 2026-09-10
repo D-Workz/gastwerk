@@ -1,13 +1,9 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Pure product selection for the waiter Menu. visibleProducts filters the
+ * supplied catalog and orders matches using configured categories without
+ * fetching data or modifying the original product array.
  */
 import type { Product } from "../../../../../../packages/contracts/src/index";
-
-/* --- Public API --- */
-
 
 type Filter = {
   search: string;
@@ -18,7 +14,8 @@ type Filter = {
 };
 
 /**
- * visibleProducts - exported function
+ * Search both translated names. Categories absent from categoryOrder have index
+ * -1 and therefore sort before listed categories; equal ranks keep input order.
  */
 export function visibleProducts(
   products: Product[],

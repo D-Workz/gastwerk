@@ -1,3 +1,8 @@
+/**
+ * Kitchen/bar queue view composed by App from polled server state. Station
+ * selects tickets and related history; shared LineCard renders details and
+ * sends transition requests through the supplied mutation function.
+ */
 import type { AppState, Mutate } from "../../shared/api/api";
 import { date, type Language, type T } from "../../shared/i18n/i18n";
 import { LineCard } from "../../shared/ui/LineCard";

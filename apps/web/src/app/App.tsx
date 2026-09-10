@@ -1,3 +1,8 @@
+/**
+ * Browser application shell, mounted by main.tsx. App restores the session,
+ * polls server state, and composes waiter, manager, and preparation views.
+ * It owns language preferences, guarded navigation, and shared mutation retries.
+ */
 import { unitLabel } from "../shared/i18n/i18n";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -36,7 +41,9 @@ export function App() {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
   const t: T = (key) => messages[language][key];
+
   const refresh = useCallback(async () => {
     try {
       const next = await api<AppState>("/state");
@@ -64,7 +71,9 @@ export function App() {
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(() => void refresh(), 2000);
+
     const online = () => void refresh();
+
     window.addEventListener("online", online);
     window.addEventListener("focus", online);
     return () => {
@@ -82,11 +91,13 @@ export function App() {
     busy: mutationBusy,
     retry,
   } = useMutation(user?.id, refresh, setError, () => setConnected(false), t);
+
   function preferences(p: Preferences) {
     void mutate("/preferences", p).then((ok) => {
       if (ok) setLanguage(p.language);
     });
   }
+
   const prefs = state?.user.preferences;
   return (
     <>

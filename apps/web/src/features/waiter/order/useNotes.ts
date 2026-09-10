@@ -1,15 +1,11 @@
-/* @copilot-fully-annotated */
-/*
- * @copilot-annotated
- * Brief: Top-level documentation added by Copilot CLI.
- * This file was annotated with a file header and lightweight JSDoc for exported symbols.
+/**
+ * Note state shared across the waiter workspace. Service owns this hook and
+ * passes it to Order/InlineNote; it retains edits outside the line renderer and
+ * coordinates revision-bearing saves and explicit flushes through Mutate.
  */
 import { useRef, useState } from "react";
 import type { Line } from "../../../../../../packages/contracts/src/index";
 import type { Mutate } from "../../../shared/api/api";
-
-/* --- Public API --- */
-
 
 type Note = {
   text: string;
@@ -24,25 +20,12 @@ export function useNotes(mutate: Mutate) {
   const entries = useRef<Record<string, Note>>({});
   const inFlight = useRef<Record<string, Promise<boolean>>>({});
   const [, render] = useState(0);
-  /**
-   * publish - brief description
-   * @param ) -
-   * @returns
-   */
+
   const publish = () => render((v) => v + 1);
 
   /**
-
-   * edit - brief description
-
-   * @param line -
-
-   * @param text -
-
-   * @returns
-
+   * Keep the revision and input from the first edit until save or explicit review.
    */
-
   function edit(line: Line, text: string) {
     const previous = entries.current[line.id];
     entries.current[line.id] = {
@@ -58,15 +41,9 @@ export function useNotes(mutate: Mutate) {
   }
 
   /**
-
-   * save - brief description
-
-   * @param id -
-
-   * @returns
-
+   * Share in-flight work for this line. On success, remove only the text that was
+   * sent; retain later edits with the next expected revision.
    */
-
   function save(id: string): Promise<boolean> {
     if (inFlight.current[id]) return inFlight.current[id];
     const entry = entries.current[id];
@@ -99,13 +76,9 @@ export function useNotes(mutate: Mutate) {
   }
 
   /**
-
-   * flush - brief description
-
-   * @returns
-
+   * Save pending drafts before navigation or sending. Return false for a submitted
+   * note or failed save so the caller can keep the workspace open.
    */
-
   async function flush(): Promise<boolean> {
     for (const id of Object.keys(entries.current)) {
       // Submitted notes require the explicit amendment button, never navigation.
@@ -117,15 +90,8 @@ export function useNotes(mutate: Mutate) {
   }
 
   /**
-
-   * review - brief description
-
-   * @param line -
-
-   * @returns
-
+   * Rebase a failed note onto the displayed line after the user requests review.
    */
-
   function review(line: Line) {
     const entry = entries.current[line.id];
     if (entry && entry.status === "error") {
@@ -141,15 +107,8 @@ export function useNotes(mutate: Mutate) {
   }
 
   /**
-
-   * discard - brief description
-
-   * @param id -
-
-   * @returns
-
+   * Discard retained text only when no save for this line is in flight.
    */
-
   function discard(id: string) {
     if (inFlight.current[id]) return;
     delete entries.current[id];
