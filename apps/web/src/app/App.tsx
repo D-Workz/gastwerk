@@ -26,6 +26,9 @@ import { Station } from "../features/preparation";
 import { errorMessage } from "../shared/i18n/errors";
 import { useMutation } from "../shared/api/useMutation";
 
+import { SourceBar } from "./SourceBar";
+import { sourceUrl } from "./source";
+
 export function App() {
   const navigationGuard = useRef<(() => Promise<boolean>) | null>(null);
   const registerGuard = useCallback(
@@ -101,6 +104,7 @@ export function App() {
   const prefs = state?.user.preferences;
   return (
     <>
+      <SourceBar appName="Gastwerk" sourceUrl={sourceUrl} />
       <header className="app-header">
         <a className="brand" href="/">
           {state?.configuration.policy.branding ?? "Gastwerk"}

@@ -433,3 +433,7 @@ pre {
     transition: background 0.12s ease;
   }
 }
+
+html {
+  scroll-padding-top: calc(var(--source-bar-height, 44px) + 12px);
+}

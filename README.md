@@ -2,7 +2,7 @@
 
 A single-venue restaurant application with persistent ingredient inventory, recipes, configurable ordering, kitchen/bar queues and service history. German is the default language; English is available. Order values are informational: closing an order does not record a payment or issue a fiscal receipt.
 
-The business baseline is [spec.md](../instructions/milestone1.md); the active waiter workflow milestone is [Milestone2.md](../instructions/Milestone2.md). See [milestone status](docs/milestone-status.md) for verification and limitations. No license has been selected.
+The business baseline is [spec.md](../instructions/milestone1.md); the active waiter workflow milestone is [Milestone2.md](../instructions/Milestone2.md). See [milestone status](docs/milestone-status.md) for verification and limitations. The project is licensed under the [MIT License](LICENSE).
 
 ## Start with Docker Compose (local development)
 

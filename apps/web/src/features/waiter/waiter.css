@@ -19,7 +19,7 @@
   gap: 12px;
   flex-wrap: wrap;
   position: sticky;
-  top: 0;
+  top: var(--source-bar-height, 44px);
   z-index: 2;
   background: var(--paper, #fff);
   padding: 12px 0;
