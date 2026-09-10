@@ -1,36 +1,28 @@
-/**
- * Browser application shell, mounted by main.tsx. App restores the session,
- * polls server state, and composes waiter, manager, and preparation views.
- * It owns language preferences, guarded navigation, and shared mutation retries.
- */
-import { unitLabel } from "../shared/i18n/i18n";
+/** Compose role views and cross-feature navigation; lifecycle and presentation have dedicated modules. */
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  label,
-  type Preferences,
-  type User,
+import type {
+  Preferences,
+  User,
 } from "../../../../packages/contracts/src/index";
-import { Field, Modal } from "../../../../packages/ui/src/index";
-import { ApiError, api, type AppState } from "../shared/api/api";
-import {
-  date,
-  euro,
-  quantity as formatQuantity,
-  messages,
-  type Language,
-  type T,
-} from "../shared/i18n/i18n";
+import { Modal } from "../../../../packages/ui/src/index";
+import { messages, type Language, type T } from "../shared/i18n/i18n";
+import { errorMessage } from "../shared/i18n/errors";
+import { useMutation } from "../shared/api/useMutation";
 import { Manager } from "../features/manager";
 import { Service } from "../features/waiter";
 import { Station } from "../features/preparation";
-import { errorMessage } from "../shared/i18n/errors";
-import { useMutation } from "../shared/api/useMutation";
-
 import { SourceBar } from "./SourceBar";
 import { sourceUrl } from "./source";
+import { AppHeader } from "./AppHeader";
+import { LoginScreen } from "./LoginScreen";
+import { HistoryView } from "./HistoryView";
+import { StockWarnings } from "./StockWarnings";
+import { useSession } from "./useSession";
 
 export function App() {
-  // The waiter supplies its current note-flush guard without owning role navigation.
+  const [language, setLanguage] = useState<Language>("de");
+  const [view, setView] = useState("service");
+  const [error, setError] = useState("");
   const navigationGuard = useRef<(() => Promise<boolean>) | null>(null);
   const registerGuard = useCallback(
     (guard: (() => Promise<boolean>) | null) => {
@@ -38,171 +30,63 @@ export function App() {
     },
     [],
   );
-  const [user, setUser] = useState<User | null>(null);
-  const [state, setState] = useState<AppState | null>(null);
-  const [language, setLanguage] = useState<Language>("de");
-  const [view, setView] = useState("service");
-  const [connected, setConnected] = useState(false);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const t: T = (key) => messages[language][key];
-
-  // Keep the last displayed state on transient failures; only a 401 clears it.
-  const refresh = useCallback(async () => {
-    try {
-      const next = await api<AppState>("/state");
-      setState(next);
-      setUser(next.user);
-      setConnected(true);
-    } catch (e) {
-      setConnected(false);
-      if (e instanceof ApiError && e.status === 401) {
-        setUser(null);
-        setState(null);
-      }
-    }
+  const onAuthenticated = useCallback((user: User) => {
+    setLanguage(user.preferences.language);
+    setView(
+      user.role === "kitchen" || user.role === "bar" ? user.role : "service",
+    );
+    setError("");
   }, []);
-  useEffect(() => {
-    void api<User>("/me")
-      .then((u) => {
-        setUser(u);
-        setLanguage(u.preferences.language);
-        setView(u.role === "kitchen" || u.role === "bar" ? u.role : "service");
-        void refresh();
-      })
-      .catch(() => {});
-  }, [refresh]);
-  // Polling follows signed-in status, not the user object replaced by each poll.
-  useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(() => void refresh(), 2000);
-
-    const online = () => void refresh();
-
-    window.addEventListener("online", online);
-    window.addEventListener("focus", online);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("online", online);
-      window.removeEventListener("focus", online);
-    };
-  }, [Boolean(user), refresh]);
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+  const { user, state, connected, refresh, login, logout, markDisconnected } =
+    useSession(onAuthenticated);
+  const t: T = (key) => messages[language][key];
   const {
     mutate,
     pending,
     busy: mutationBusy,
     retry,
-  } = useMutation(user?.id, refresh, setError, () => setConnected(false), t);
+  } = useMutation(user?.id, refresh, setError, markDisconnected, t);
+  const prefs = state?.user.preferences;
 
-  function preferences(p: Preferences) {
-    void mutate("/preferences", p).then((ok) => {
-      if (ok) setLanguage(p.language);
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  function preferences(next: Preferences) {
+    void mutate("/preferences", next).then((ok) => {
+      if (ok) setLanguage(next.language);
     });
   }
 
-  const prefs = state?.user.preferences;
+  async function canNavigate() {
+    return !navigationGuard.current || (await navigationGuard.current());
+  }
+
+  async function signOut() {
+    if (!(await canNavigate())) return;
+    try {
+      await logout();
+    } catch (failure) {
+      setError(errorMessage(failure, t));
+    }
+  }
+
   return (
     <>
       <SourceBar appName="Gastwerk" sourceUrl={sourceUrl} />
-      <header className="app-header">
-        <a className="brand" href="/">
-          {state?.configuration.policy.branding ?? "Gastwerk"}
-          <small>RESTAURANT OPERATIONS</small>
-        </a>
-        <div className="row">
-          <select
-            aria-label="Sprache / Language"
-            value={language}
-            onChange={(e) => {
-              const next = e.target.value as Language;
-              if (prefs) preferences({ ...prefs, language: next });
-              else setLanguage(next);
-            }}
-          >
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-          </select>
-          {user && (
-            <>
-              <span>
-                {user.username} · {t(user.role)}
-              </span>
-              <button
-                onClick={async () => {
-                  if (
-                    navigationGuard.current &&
-                    !(await navigationGuard.current())
-                  )
-                    return;
-                  void api("/logout", {}).then(() => {
-                    setUser(null);
-                    setState(null);
-                  });
-                }}
-              >
-                {t("signOut")}
-              </button>
-            </>
-          )}
-        </div>
-      </header>
+      <AppHeader
+        branding={state?.configuration.policy.branding ?? "Gastwerk"}
+        user={user}
+        language={language}
+        t={t}
+        onLanguage={(next) => {
+          if (prefs) preferences({ ...prefs, language: next });
+          else setLanguage(next);
+        }}
+        onLogout={() => void signOut()}
+      />
       {!user ? (
-        <main className="login panel">
-          <small>GASTWERK / 01</small>
-          <h1>{t("signIn")}</h1>
-          <p>{t("demo")}</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const data = new FormData(e.currentTarget);
-              setBusy(true);
-              setError("");
-              void api<User>("/login", Object.fromEntries(data))
-                .then((u) => {
-                  setUser(u);
-                  setLanguage(u.preferences.language);
-                  setView(
-                    u.role === "kitchen" || u.role === "bar"
-                      ? u.role
-                      : "service",
-                  );
-                  return refresh();
-                })
-                .catch((e: Error) => setError(errorMessage(e, t)))
-                .finally(() => setBusy(false));
-            }}
-          >
-            <Field label={t("username")}>
-              <input
-                name="username"
-                autoComplete="username"
-                required
-                defaultValue="waiter"
-              />
-            </Field>
-            <Field label={t("password")}>
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-            </Field>
-            <button className="primary" disabled={busy}>
-              {busy ? t("loading") : t("signIn")}
-            </button>
-          </form>
-          {error && (
-            <p className="error" role="alert">
-              {error}
-            </p>
-          )}
-          <small>manager · waiter · kitchen · bar</small>
-        </main>
+        <LoginScreen login={login} t={t} />
       ) : (
         <main className={prefs?.density ?? "comfortable"}>
           <div
@@ -235,11 +119,7 @@ export function App() {
                 key={v}
                 aria-pressed={view === v}
                 onClick={async () => {
-                  if (
-                    !navigationGuard.current ||
-                    (await navigationGuard.current())
-                  )
-                    setView(v);
+                  if (await canNavigate()) setView(v);
                 }}
               >
                 {t(v as keyof typeof messages.en)}
@@ -263,28 +143,7 @@ export function App() {
           </nav>
           {state && prefs ? (
             <>
-              <div className="stock-warnings">
-                {state.ingredients
-                  .filter(
-                    (i) =>
-                      Number(state.balances[i.id] ?? 0) < 0 ||
-                      (i.threshold !== null &&
-                        Number(state.balances[i.id] ?? 0) <
-                          Number(i.threshold)),
-                  )
-                  .map((i) => (
-                    <p key={i.id} className="warning">
-                      {t(
-                        Number(state.balances[i.id] ?? 0) < 0
-                          ? "negative"
-                          : "low",
-                      )}
-                      : {label(i.name, language)}{" "}
-                      {formatQuantity(state.balances[i.id] ?? "0", language)}{" "}
-                      {unitLabel(i.unit, language)}. {t("stockWarning")}
-                    </p>
-                  ))}
-              </div>
+              <StockWarnings state={state} language={language} t={t} />
               {view === "service" && (
                 <Service
                   state={state}
@@ -314,38 +173,7 @@ export function App() {
                 />
               )}{" "}
               {view === "history" && (
-                <section className="panel">
-                  <h2>{t("history")}</h2>
-                  {state.orders
-                    .filter((o) => o.closedAt)
-                    .map((o) => (
-                      <details key={o.id}>
-                        <summary>
-                          {t("table")}{" "}
-                          {state.tables.find((t) => t.id === o.tableId)?.number}{" "}
-                          · {date(o.closedAt!, language)} ·{" "}
-                          {euro(o.total, language)}
-                        </summary>
-                        {state.lines
-                          .filter((l) => l.orderId === o.id)
-                          .map((l) => (
-                            <p key={l.id}>
-                              {l.input.quantity} ×{" "}
-                              {label(l.snapshot.product.name, language)} ·{" "}
-                              {t(l.state)} · {l.input.note}
-                            </p>
-                          ))}
-                      </details>
-                    ))}
-                  {state.history.map((h) => (
-                    <details key={h.id}>
-                      <summary>
-                        {date(h.at, language)} · {h.action} · {h.actor}
-                      </summary>
-                      <pre>{JSON.stringify(h.detail, null, 2)}</pre>
-                    </details>
-                  ))}
-                </section>
+                <HistoryView state={state} language={language} t={t} />
               )}
             </>
           ) : (

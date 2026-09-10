@@ -1,6 +1,6 @@
 # Browser application
 
-React/Vite frontend. [src/main.tsx](src/main.tsx) mounts [App](src/app/App.tsx), which owns login/session state, polling, language, role navigation, retry presentation, stock warnings and manager history. These concerns remain together in App; there is no separate authentication router or history feature.
+React/Vite frontend. [src/main.tsx](src/main.tsx) mounts [App](src/app/App.tsx), which connects role views, language/navigation state and retries. Session/snapshot lifecycle lives in useSession, refresh scheduling in usePolling, and login/header/history/stock presentation in dedicated components; see the [app guide](src/app/README.md).
 
 ## How to navigate the browser app
 
@@ -24,13 +24,13 @@ A feature is a related set of screens and interactions. A hook such as `useMutat
 
 For example, a kitchen worker selects Start preparing on a ticket. The shared LineCard sends a revision-bearing mutation through the browser's retry mechanism and HTTP helper. The API checks the session, permission and current item state before changing it and recording ingredient consumption. The browser refreshes application state after a successful mutation.
 
-While signed in, App also schedules a state fetch every two seconds and refreshes on window focus or reconnection. This is polling, not a server-push connection or a guaranteed freshness deadline. A visible role-specific button does not grant permission; the API checks requests independently.
+While signed in, the session hook uses usePolling to schedule a state fetch every two seconds and refreshes on window focus or reconnection. This is polling, not a server-push connection or a guaranteed freshness deadline. A visible role-specific button does not grant permission; the API checks requests independently.
 
 ## Structural limitations to keep in view
 
 These are current code-organization observations, not fixes made by this guide:
 
-- App combines composition with session/polling and history presentation. See [app responsibilities and possible separation](src/app/README.md#structural-limitations).
+- Session/snapshot ownership, polling and presentation are separated within app/. App still coordinates role navigation and waiter guards; see [extension boundaries](src/app/README.md#extending-and-remaining-boundaries).
 - Feature orchestration is uneven: waiter Service owns many callbacks and navigation state; manager owns extra reads as well as editor state. Details belong in the [waiter](src/features/waiter/README.md) and [manager](src/features/manager/README.md) guides. This does not require turning every component into a separate hook.
 - Global styles include feature-specific layouts alongside generic rules; waiter has a separate scoped stylesheet, and SourceBar uses a CSS module. Future layout changes must inspect both sources of styling.
 - Shared response-contract ownership spans browser and API tests; the issue is recorded once in the [main README](../../README.md#shared-response-contract-ownership).

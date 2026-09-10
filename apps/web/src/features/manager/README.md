@@ -2,7 +2,7 @@
 
 ## Purpose and boundaries
 
-Owns catalog/policy editing, inventory entry and user administration UI. Closed-order/history rendering remains in App, while validation/permissions and persistence remain in the API.
+Owns catalog/policy editing, inventory entry and user administration UI. Closed-order/history rendering lives in [HistoryView](../../app/HistoryView.tsx), composed by App, while validation/permissions and persistence remain in the API.
 
 ## Start here
 

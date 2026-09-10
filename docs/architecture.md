@@ -12,7 +12,7 @@ The restaurant Git and application command/configuration root is `gastwerk/`, pi
 
 | Runtime          | Start here                                                                    | Relationship                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Browser          | [main.tsx](../apps/web/src/main.tsx) → [App.tsx](../apps/web/src/app/App.tsx) | Session, language, polling and feature composition; calls `/api`                                |
+| Browser          | [main.tsx](../apps/web/src/main.tsx) → [App.tsx](../apps/web/src/app/App.tsx) | App composes views; useSession owns snapshot/authentication and usePolling schedules `/api` refreshes                                |
 | Development web  | [Vite configuration](../apps/web/vite.config.ts)                              | Proxies `/api` to the configured API target                                                     |
 | Container web    | [Dockerfile](../apps/web/Dockerfile), [Nginx](../apps/web/nginx.conf)         | Serves built assets; resolves API through Docker DNS; static health is separate from API health |
 | API              | [main.ts](../apps/api/src/main.ts) → [buildApp](../apps/api/src/app.ts)       | Fastify routes, request protection and error mapping; calls services and SQL                    |
@@ -55,14 +55,14 @@ The backend is a modular monolith. HTTP mutations generally enter `mutation`, th
 | API access permission             | [request hooks/routes](../apps/api/src/app.ts) → [authenticate](../apps/api/src/identity/service.ts) → [permit](../apps/api/src/shared/audit.ts) in handlers/services; station-sensitive transition checks and [role-filtered readState](../apps/api/src/service/readState.ts); [direct API tests](../tests/api.integration.test.ts)                                                                                                          |
 | New frontend feature              | [web guide](../apps/web/README.md) → `src/features/<feature>/index.ts` composed by [App](../apps/web/src/app/App.tsx); use [shared api/Mutate](../apps/web/src/shared/api/api.ts), shared contracts and server authorization; [import graph](../tests/architecture.test.ts), [components](../tests/components.test.tsx) and [browser workflows](../tests/e2e/workflow.spec.ts)                                                                |
 
-Frontend imports normally flow App → feature entry points → shared web code/shared source packages. Stateful orchestration is split unevenly: preview and notes have hooks, while App and waiter Service retain substantial state/actions. Manager also performs its own read requests through shared transport. Rendering, hooks and pure menu filtering are distinguished in the module READMEs.
+Frontend imports normally flow App → feature entry points → shared web code/shared source packages. Stateful orchestration is split unevenly: session/snapshot lifecycle, polling, preview and notes have hooks, while waiter Service retains substantial state/actions. App coordinates role/language selection and navigation guards. Manager also performs its own read requests through shared transport. Rendering, hooks and pure menu filtering are distinguished in the module READMEs.
 
 ### Existing coupling and limitations
 
 - `apps/api/src/app.ts` contains users/ledger/logout SQL and multi-line send coordination, not only transport adaptation.
 - `DomainError` is exported by catalog resolution but used throughout the backend. Services also update SQL owned conceptually by neighboring modules; boundaries are conventions rather than sealed packages.
 - The `AppState` response type is defined in web transport and imported by integration tests. The backend does not runtime-validate the whole response against a shared schema.
-- Shared `LineCard` contains workflow actions; it is domain-aware. History rendering remains in App rather than a separate feature.
+- Shared `LineCard` contains workflow actions; it is domain-aware. History rendering lives in the app-level HistoryView, composed by App.
 - The existing graph test covers a subset of relative static web imports, cycles and shared-to-feature dependencies. It does not enforce all layering rules.
 - Aggregate state reads are unpaginated for lines/orders, and polling can overlap. A two-second timer is not a guaranteed three-second delivery bound. See the [review findings](milestone-3-review.md#findings-and-discrepancies) for suspected failure paths and coverage gaps.
 
@@ -117,7 +117,7 @@ The migration entry point runs idempotent initial DDL under a transaction adviso
 
 | Previous file/responsibility                          | Current module                                                                                                                                       |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `App.tsx` shell, authentication, role navigation      | `src/app/App.tsx`                                                                                                                                    |
+| `App.tsx` shell, authentication, role navigation      | `src/app/App.tsx` composes views; `src/app/useSession.ts` owns session/snapshot lifecycle                                                                 |
 | `Service.tsx` combined tables/menu/order              | `features/waiter/Service.tsx` coordinates workspace navigation; `tables/Tables.tsx`, `menu/Menu.tsx`, `order/Order.tsx` render individual workspaces |
 | Menu filtering in service rendering                   | Pure `menu/catalog.ts` transformation                                                                                                                |
 | Modal `Customizer.tsx`                                | `customize/ChoiceSteps.tsx` for sequential selections; `customize/Customizer.tsx` for deliberate ingredient edits                                    |
@@ -142,3 +142,7 @@ The earlier startup table describes **local development Compose**. Root [deploym
 [Deployment initialization](../apps/api/src/deployment/README.md) owns production secret-file parsing and explicit migration/bootstrap entry points; it does not change business persistence rules. Normal API startup neither migrates nor seeds. The [web configuration generator](../../deploy/render-nginx.mjs) owns same-origin API proxying, scoped forwarding trust and exact iframe policies. The fixed gateway address is outside the dynamic private allocation range. [Deployment](../../docs/deployment.md) and [operations](../../docs/operations.md) own server configuration, Git release selection, backup and recovery behavior.
 
 The browser App also owns a [sticky source bar](../apps/web/src/app/SourceBar.tsx), configured by [source.ts](../apps/web/src/app/source.ts). It renders outside role views and inside each embedded document. Its measured height offsets waiter sticky navigation and document focus scrolling; it has no API or portfolio dependency.
+
+## Browser session composition
+
+[App](../apps/web/src/app/README.md) connects `useSession` → role features/presentation and `useMutation` → session refresh. `useSession` owns either an initial authenticated user or a full snapshot containing that user; `usePolling` owns only timers/listeners. LoginScreen, AppHeader, HistoryView and StockWarnings receive callbacks/data and do not fetch independently. Session generations discard results from an obsolete login/session lifecycle. Polling within a session can still overlap. See [session tests](../tests/session.test.tsx) and [composition tests](../tests/app.test.tsx).

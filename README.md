@@ -30,7 +30,7 @@ This nested approach helps people navigate the project and gives coding agents a
 
 ### Follow a browser action
 
-The browser's [web app](apps/web/README.md) groups screens into waiter, preparation and manager features. The [API app](apps/api/README.md) groups server work into business modules such as identity, orders, preparation and inventory. These are two applications; individual feature/module folders are not additional servers.
+The browser's [web app](apps/web/README.md) groups screens into waiter, preparation and manager features. Within its [app module](apps/web/src/app/README.md), App composes those views, useSession owns authentication and server state, usePolling schedules refreshes, and dedicated components render login, header, history and stock warnings. The [API app](apps/api/README.md) groups server work into business modules such as identity, orders, preparation and inventory. These are two applications; individual feature/module folders are not additional servers.
 
 For example, Start preparing sends a request from a browser ticket to the API. The API validates the action and records the preparation change and stock consumption in one transaction. The browser then refreshes its displayed state and also polls while signed in. Read the app guides for folder tables and the complete request journey.
 
@@ -113,6 +113,8 @@ npm run test:integration
 npm run test:e2e
 npm run build
 ```
+
+On a newly created `venue_e2e` database, initialize it once before the first browser run with `npx tsx -e 'import("./tests/e2e/setup.ts").then(module => module.default())'` from `gastwerk/`. This test setup **drops and recreates only the fixed `venue_e2e` public schema**, then migrates/seeds it. The existing Playwright configuration waits for API readiness before global setup, so an empty database otherwise prevents startup. Subsequent browser runs repeat the isolated reset automatically.
 
 “Database already exists” is harmless when repeating database creation. `TEST_DATABASE_URL` may override the integration database URL; keep the isolated database name. Browser tests use localhost ports 3002/5180 and the fixed local `venue_e2e` database. Playwright may need OS browser libraries; consult its installation output.
 
