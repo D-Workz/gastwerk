@@ -29,7 +29,7 @@ New features should use this transport and supplied Mutate rather than inventing
 
 [intentional queue and lost-response retry](../../../../tests/notes.test.tsx); [relative-import graph constraints](../../../../tests/architecture.test.ts); [controls and localized preview failure](../../../../tests/components.test.tsx).
 
-Run `npm test -- tests/notes.test.tsx tests/architecture.test.ts tests/components.test.tsx` from `codex/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+Run `npm test -- tests/notes.test.tsx tests/architecture.test.ts tests/components.test.tsx` from `gastwerk/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
 
 ## Limitations and related documentation
 

@@ -23,6 +23,12 @@ import {
 import { usePreview } from "./usePreview";
 import { QuantityControl } from "../../../shared/ui/QuantityControl";
 
+/**
+ * Input initializes from line, then initialInput, then product defaults. Remount
+ * when switching editing targets; polling updates do not reset local edits.
+ * A replacement previews current pricing, while an edit supplies the line ID
+ * so the API can use its historical definitions and pricing policy.
+ */
 export function Customizer({
   product,
   line,
@@ -84,6 +90,7 @@ export function Customizer({
   const [split, setSplit] = useState(false);
   const [reason, setReason] = useState("");
 
+  // Ingredient edits are final quantities, replacing any earlier edit for that ID.
   function edit(id: string, quantity: string, portionId?: string) {
     setInput((old) => ({
       ...old,
@@ -94,6 +101,7 @@ export function Customizer({
     }));
   }
 
+  // null inherits category shortcuts; an explicit empty list opts out of them.
   const quick =
     product.quick ??
     state.configuration.policy.categories.find((c) => c.id === product.category)

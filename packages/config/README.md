@@ -1,31 +1,37 @@
-# Shared policy and environment schema
+# Config: settings and defaults
 
-## Purpose and boundaries
+Config describes the settings Gastwerk understands and the default values used when creating an initial policy. It is the shared definition of configuration, not the place that saves settings or performs price calculations.
 
-Owns the venue policy schema/default and API environment schema. It does not read or write PostgreSQL itself.
+## What is inside?
 
-## Start here
+The entry point is [src/index.ts](src/index.ts).
 
-- [policySchema, defaultPolicy and envSchema](src/index.ts)
+| Export | Purpose | Example |
+| --- | --- | --- |
+| `policySchema` and `Policy` | Runtime validation and TypeScript description of restaurant policy. | Rounding rules, pricing options, categories, branding and initial display preferences. |
+| `defaultPolicy` | An initial policy produced from those defaults. | Used by development seeding and explicit administrator bootstrap. |
+| `envSchema` | Basic server environment validation with development defaults. | API port, database connection setting, browser origin and cookie setting. |
 
-## Interfaces and dependencies
+A schema checks whether data has the expected structure and allowed values. Config uses Zod for these checks and imports preference definitions from [contracts](../contracts/README.md).
 
-Depends on contracts for preferences. API db.ts parses process.env; configuration repository/save functions parse persisted/submitted policy. Catalog uses the Policy type for calculations. Like the other shared source directories, it has no separate npm manifest or build.
+## How the applications use it
 
-## Behavior and invariants
+The browser's [PolicyForm](../../apps/web/src/features/manager/PolicyForm.tsx) uses the policy schema while editing settings. The API's [configuration module](../../apps/api/src/configuration/README.md) validates and stores policy. The [catalog resolver](../../apps/api/src/catalog/resolve.ts) uses the policy to calculate prices; the calculation itself stays on the server.
 
-Policy schema version is currently 1; persisted row revision is separate. Pricing defaults, correction reason length, category quick choices, initial display settings and branding are validated fields. Environment variables govern database connection, API port, browser origin and cookie behavior; do not copy credentials into module documentation.
+For example, config describes whether ingredient removals receive a proportional refund. The manager can select that option, the API saves it, and the resolver applies it when calculating an eligible customization.
 
-## Making changes
+The API's [runtime environment module](../../apps/api/src/deployment/environment.ts) reads supplied environment values and production secret files, applies production-specific checks, and uses `envSchema`. Config itself does not read files or connect to PostgreSQL. Server environment values are not frontend configuration to expose to visitors.
 
-Coordinate new fields with manager PolicyForm, configuration persistence and catalog calculation. Changing defaultPolicy alone does not rewrite existing persisted policy. Keep canonical environment instructions in the root README.
+## Important boundaries
+
+Changing `defaultPolicy` does not automatically update a policy already saved in the database. Policy schema version (currently 1) is also separate from the saved row's revision, which tracks edits. Historical order snapshots retain their captured pricing policy.
+
+When adding a setting, inspect the editor, API validation/persistence and the calculation that consumes it. Keep environment setup instructions in the [main README](../../README.md) and production instructions in the [deployment guide](../../../docs/deployment.md).
 
 ## Verification
 
-[pricing policy consumers](../../tests/domain.test.ts); [policy snapshot and preference behavior](../../tests/api.integration.test.ts).
+[Domain tests](../../tests/domain.test.ts) exercise pricing policies and rounding through their actual calculation consumers. [API integration tests](../../tests/api.integration.test.ts) cover persisted policy and snapshot behavior.
 
-Run `npm test -- tests/domain.test.ts` from `codex/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../README.md) and [Milestone 3 execution results](../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+With dependencies installed and the [supported Node runtime](../../README.md#tests-and-checks), run `npm test -- tests/domain.test.ts` from `gastwerk/`; this command needs no database. Integration tests have separate isolated-database prerequisites in that guide. These references describe coverage, not a claim that tests were run for the current edit.
 
-## Limitations and related documentation
-
-Use the [architecture map](../../docs/architecture.md) for neighboring modules and the [review findings](../../docs/milestone-3-review.md) for qualified claims.
+Return to the [packages overview](../README.md) or [architecture map](../../docs/architecture.md).

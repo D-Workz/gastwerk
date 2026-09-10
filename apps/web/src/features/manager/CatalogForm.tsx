@@ -92,6 +92,7 @@ export function CatalogForm({
     return null;
   }
   if (!schema.safeParse(raw).success) return null;
+  // Use the original JSON after the shape check, retaining advanced fields.
   const record = raw as Ingredient | Product | Table;
 
   const update = (patch: object) =>

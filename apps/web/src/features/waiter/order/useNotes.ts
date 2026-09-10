@@ -15,7 +15,10 @@ type Note = {
   state: Line["state"];
 };
 
-/** Keep failed text outside the line view. Flush explicitly before sending or leaving. */
+/**
+ * Keep failed text outside the line view. Flush explicitly before sending or leaving.
+ * State is memory-only: it survives child view changes, not a reload or hook unmount.
+ */
 export function useNotes(mutate: Mutate) {
   const entries = useRef<Record<string, Note>>({});
   const inFlight = useRef<Record<string, Promise<boolean>>>({});
@@ -84,6 +87,8 @@ export function useNotes(mutate: Mutate) {
       // Submitted notes require the explicit amendment button, never navigation.
       if (entries.current[id]?.state !== "draft") return false;
       if (!(await save(id))) return false;
+      // One follow-up handles text replaced during the first save; this is not a
+      // drain-until-empty loop for callers that continue editing during a flush.
       if (entries.current[id] && !(await save(id))) return false;
     }
     return true;

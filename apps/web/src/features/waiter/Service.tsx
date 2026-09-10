@@ -58,6 +58,7 @@ export function Service({
   const workspace = useRef<HTMLDivElement>(null);
   const scroll = useRef(0);
   const adding = useRef(false);
+  // A failed async action may need catalog data refreshed while it was waiting.
   const latest = useRef(state);
   latest.current = state;
   const table = state.tables.find((v) => v.id === tableId);
@@ -90,11 +91,13 @@ export function Service({
   }, [screen]);
 
   useEffect(() => {
+    // The registered callback reads the latest guard without reinstalling listeners.
     registerGuard?.(() => guard.current());
 
     const back = (event: PopStateEvent) => {
       void guard.current().then((ok) => {
         if (ok) {
+          // Browser Back restores tables/menu, not every intermediate editor step.
           const destination = event.state?.waiter;
           setScreen(
             destination === "tables" || !destination ? "tables" : "menu",
@@ -143,6 +146,10 @@ export function Service({
       );
   }
 
+  /**
+   * Products with multiple sizes or any groups enter the choice flow, regardless
+   * of the guided flag. Otherwise add a draft immediately with configured defaults.
+   */
   async function add(product: Product) {
     if (adding.current) return;
     if ((product.sizes?.length ?? 0) > 1 || product.groups.length) {
@@ -204,6 +211,10 @@ export function Service({
     }
   }
 
+  /**
+   * Anticipate one revision increment if a retained note is saved first. The
+   * server still checks this expected revision; the client does not reserve it.
+   */
   async function decrease(line: Line) {
     const version = notes.entries[line.id]
       ? notes.entries[line.id]!.version + 1
@@ -226,6 +237,7 @@ export function Service({
 
   async function send() {
     setBusy(true);
+    // Capture draft revisions, allowing one increment for each pending note save.
     const drafts = lines
       .filter((l) => l.state === "draft")
       .map((l) => ({
@@ -300,6 +312,7 @@ export function Service({
               {t("undo")}
             </button>
           )}
+          {/* Preserve menu filters while an order/editor is open; Tables unmounts it. */}
           <div hidden={screen !== "menu"}>
             <Menu
               state={state}

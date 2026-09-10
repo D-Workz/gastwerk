@@ -9,6 +9,10 @@ import type {
 } from "../../../../../../packages/contracts/src/index";
 import { api } from "../../../shared/api/api";
 
+/**
+ * lineId selects historical edit context; omit it for additions/replacements.
+ * A successful preview does not reserve stock or authorize a later save.
+ */
 export function previewCustomization(
   input: Customization,
   lineId?: string,

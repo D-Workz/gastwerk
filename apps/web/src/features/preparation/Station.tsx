@@ -20,6 +20,7 @@ export function Station({
   t: T;
   mutate: Mutate;
 }) {
+  // Use the saved station assignment; cancelled tickets remain visible as notices.
   const lines = state.lines.filter(
     (l) =>
       l.snapshot.product.station === station &&

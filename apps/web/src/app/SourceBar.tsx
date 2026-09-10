@@ -1,8 +1,17 @@
+/**
+ * App-level source link with a measured height shared through document-root CSS.
+ * Document scroll padding and waiter sticky navigation consume that height;
+ * the linked repository is supplied by App rather than fetched at runtime.
+ */
 import { useLayoutEffect, useRef } from "react";
 import styles from "./source-bar.module.css";
 
 type Props = { appName: string; sourceUrl: string };
 
+/**
+ * Mount once per document: this instance owns --source-bar-height and removes
+ * it on unmount. An iframe has its own document and therefore its own offset.
+ */
 export function SourceBar({ appName, sourceUrl }: Props) {
   const bar = useRef<HTMLDivElement>(null);
 
@@ -16,6 +25,7 @@ export function SourceBar({ appName, sourceUrl }: Props) {
       );
     };
 
+    // Measure before paint, then follow wrapping and font/viewport size changes.
     updateHeight();
     const observer = new ResizeObserver(updateHeight);
     observer.observe(element);

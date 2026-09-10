@@ -108,6 +108,7 @@ export function useMutation(
     body: unknown,
     onSuccess?: (result: MutationResult) => void,
   ): Promise<boolean> {
+    // Recover the queue tail after rejection without hiding rejection from this caller.
     const next = queue.current.then(() => runMutation(path, body, onSuccess));
     queue.current = next.catch(() => false);
     return next;
@@ -123,11 +124,13 @@ export function useMutation(
     if (onSuccess) callbacks.current.set(key, onSuccess);
     const result = await execute({ path, body, key });
     if (result !== null) return result;
+    // Suspend this queue entry until retry resolves the retained operation.
     return new Promise<boolean>((resolve) => {
       resolvePending.current = resolve;
     });
   }
 
+  /** Retry the stored operation, preserving its key and any still-mounted caller. */
   async function retry() {
     if (!pending || lock.current) return;
     const result = await execute(pending);

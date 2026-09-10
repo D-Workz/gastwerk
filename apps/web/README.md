@@ -2,6 +2,39 @@
 
 React/Vite frontend. [src/main.tsx](src/main.tsx) mounts [App](src/app/App.tsx), which owns login/session state, polling, language, role navigation, retry presentation, stock warnings and manager history. These concerns remain together in App; there is no separate authentication router or history feature.
 
+## How to navigate the browser app
+
+Web is the React application that runs in the visitor's browser. It displays server data, collects input and sends HTTP requests to the API. It does not access PostgreSQL directly or decide authoritative prices and permissions.
+
+| Location under `src/` | Purpose | Start here |
+| --- | --- | --- |
+| `main.tsx` | Start React and load global styles. | [Browser entry point](src/main.tsx) |
+| `app/` | Assemble login, role views, data refresh, retries and the source bar. | [App composition guide](src/app/README.md) |
+| `features/waiter/` | Tables, menu, choices, customization and orders. | [Waiter guide](src/features/waiter/README.md) |
+| `features/preparation/` | Kitchen/bar queues and preparation controls. | [Preparation guide](src/features/preparation/README.md) |
+| `features/manager/` | Catalog, policy, inventory and user administration. | [Manager guide](src/features/manager/README.md) |
+| `shared/` | Browser API calls, retry state, translations and common controls. | [Shared browser guide](src/shared/README.md) |
+| `style.css` | Global typography, controls and shared layouts. | [Styles](src/style.css) |
+
+A feature is a related set of screens and interactions. A hook such as `useMutation` manages state and effects reused by components. `App.tsx` connects these pieces and passes server state and mutation callbacks into features.
+
+`web/shared` contains browser-specific reusable code, including order-line controls that understand the restaurant workflow. [Packages](../../packages/README.md) contain definitions shared with the API or generic React controls: `Field` belongs in packages/ui, while the restaurant-aware `LineCard` belongs in web/shared/ui.
+
+## How a screen reaches the server
+
+For example, a kitchen worker selects Start preparing on a ticket. The shared LineCard sends a revision-bearing mutation through the browser's retry mechanism and HTTP helper. The API checks the session, permission and current item state before changing it and recording ingredient consumption. The browser refreshes application state after a successful mutation.
+
+While signed in, App also schedules a state fetch every two seconds and refreshes on window focus or reconnection. This is polling, not a server-push connection or a guaranteed freshness deadline. A visible role-specific button does not grant permission; the API checks requests independently.
+
+## Structural limitations to keep in view
+
+These are current code-organization observations, not fixes made by this guide:
+
+- App combines composition with session/polling and history presentation. See [app responsibilities and possible separation](src/app/README.md#structural-limitations).
+- Feature orchestration is uneven: waiter Service owns many callbacks and navigation state; manager owns extra reads as well as editor state. Details belong in the [waiter](src/features/waiter/README.md) and [manager](src/features/manager/README.md) guides. This does not require turning every component into a separate hook.
+- Global styles include feature-specific layouts alongside generic rules; waiter has a separate scoped stylesheet, and SourceBar uses a CSS module. Future layout changes must inspect both sources of styling.
+- Shared response-contract ownership spans browser and API tests; the issue is recorded once in the [main README](../../README.md#shared-response-contract-ownership).
+
 ## Module entry points
 
 - [Waiter](src/features/waiter/README.md): table/menu/customization/order navigation and note orchestration.

@@ -20,6 +20,7 @@ export function InlineNote({
   const [expanded, setExpanded] = useState(false);
   const entry = notes.entries[line.id];
   const editable = ["draft", "submitted"].includes(line.state);
+  // A polled transition can lock the line while local text still needs recovery.
   if (!editable)
     return (
       <div>

@@ -37,6 +37,7 @@ export function LineCard({
   onEdit?: (replacement: boolean) => void;
   manager?: boolean;
 }) {
+  // null closes the cancellation dialog; an empty string opens an unfilled reason.
   const [reason, setReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 

@@ -34,6 +34,7 @@ See [onboarding](../README.md), [API routes](api.md), [configuration](configurat
 | API shared      | [Mutation envelope, permissions and audit](../apps/api/src/shared/README.md)                     |
 | Persistence     | [Pool, transactions, migrations and seed](../apps/api/src/persistence/README.md)                 |
 | Web application | [App composition and new feature placement](../apps/web/README.md)                               |
+| Web app composition | [Session, polling, role composition and source bar](../apps/web/src/app/README.md) |
 | Waiter          | [Tables, menu, choices, order and note orchestration](../apps/web/src/features/waiter/README.md) |
 | Manager         | [Catalog, policy, stock and user editing](../apps/web/src/features/manager/README.md)            |
 | Preparation     | [Kitchen/bar queues](../apps/web/src/features/preparation/README.md)                             |

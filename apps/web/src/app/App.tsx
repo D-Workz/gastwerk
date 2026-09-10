@@ -30,6 +30,7 @@ import { SourceBar } from "./SourceBar";
 import { sourceUrl } from "./source";
 
 export function App() {
+  // The waiter supplies its current note-flush guard without owning role navigation.
   const navigationGuard = useRef<(() => Promise<boolean>) | null>(null);
   const registerGuard = useCallback(
     (guard: (() => Promise<boolean>) | null) => {
@@ -47,6 +48,7 @@ export function App() {
 
   const t: T = (key) => messages[language][key];
 
+  // Keep the last displayed state on transient failures; only a 401 clears it.
   const refresh = useCallback(async () => {
     try {
       const next = await api<AppState>("/state");
@@ -71,6 +73,7 @@ export function App() {
       })
       .catch(() => {});
   }, [refresh]);
+  // Polling follows signed-in status, not the user object replaced by each poll.
   useEffect(() => {
     if (!user) return;
     const interval = setInterval(() => void refresh(), 2000);

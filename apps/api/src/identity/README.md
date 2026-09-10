@@ -27,7 +27,7 @@ Inspect both `app.ts` protection hooks and each affected service permission chec
 
 [direct API authentication and permission checks](../../../../tests/api.integration.test.ts); [login across roles](../../../../tests/e2e/workflow.spec.ts).
 
-Run `npm run test:integration` from `codex/`. Requires the isolated `venue_test` PostgreSQL database; the suite mutates test fixtures. It was inspected, not executed for Milestone 3. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+Run `npm run test:integration` from `gastwerk/`. Requires the isolated `venue_test` PostgreSQL database; the suite mutates test fixtures. It was inspected, not executed for Milestone 3. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
 
 ## Limitations and related documentation
 

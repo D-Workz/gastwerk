@@ -339,6 +339,7 @@ export const messages = {
 export type Language = keyof typeof messages;
 export type T = (key: keyof typeof messages.en) => string;
 
+// Number conversion here is for display; authoritative decimal arithmetic stays in the API.
 export const euro = (value: string, lang: Language) =>
   new Intl.NumberFormat(lang === "de" ? "de-AT" : "en-IE", {
     style: "currency",

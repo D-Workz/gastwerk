@@ -1,6 +1,6 @@
 /**
  * Guided size and preparation selection within the waiter workspace. Service
- * opens this view for products with choices; the last selection submits an item
+ * opens this view for products with choices; the last selection saves a draft item
  * through Mutate, and a failed save retains the selections for retry.
  */
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +25,10 @@ type Props = {
   onBack: () => void;
 };
 
+/**
+ * Remount for a different product: input and step are initialized only on mount.
+ * Clear the parent's busy guard before onAdded so its navigation can proceed.
+ */
 export function ChoiceSteps({
   product,
   tableId,
@@ -58,7 +62,7 @@ export function ChoiceSteps({
   }, [step]);
 
   /**
-   * Intermediate selections advance locally; the final step sends the item.
+   * Intermediate selections advance locally; the final step saves an unsent item.
    * The ref blocks additional submissions before React renders the busy state.
    */
   async function choose(next: Customization) {

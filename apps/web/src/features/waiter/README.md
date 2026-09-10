@@ -30,8 +30,14 @@ Change selection rendering in tables/menu, filtering in menu/catalog.ts, choice 
 
 [choices, failures and menu/order interaction](../../../../../tests/components.test.tsx); [flush, amendment, retry and retained text](../../../../../tests/notes.test.tsx); [German/English viewport workflows](../../../../../tests/e2e/workflow.spec.ts); [authoritative repeats and serving-size effects](../../../../../tests/api.integration.test.ts).
 
-Run `npm test -- tests/components.test.tsx tests/notes.test.tsx` from `codex/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../../../../README.md) and [Milestone 3 execution results](../../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+Run `npm test -- tests/components.test.tsx tests/notes.test.tsx` from `gastwerk/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../../../../README.md) and [Milestone 3 execution results](../../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
 
 ## Limitations and related documentation
 
 The Add branch uses group/size presence, not product.guided. Submitted-note flush blocks navigation rather than silently saving. Backend repeat failures all lead to the review flow; this is not a dedicated typed price-change response branch. Use the [architecture map](../../../../../docs/architecture.md) for neighboring modules and the [review findings](../../../../../docs/milestone-3-review.md) for qualified claims.
+
+## Editor lifecycle constraints
+
+ChoiceSteps and Customizer initialize local input on mount; they do not reset it when a different product/line prop is supplied to an existing instance. Callers should remount when switching editing targets. Polling should not replace in-progress edits.
+
+Note state is memory-only and survives child-view changes while Service remains mounted. `useNotes.flush` visits the IDs present when flushing begins and attempts at most two saves per ID. It is not an unbounded drain of edits made during a flush. `Service.send` and `decrease` anticipate one revision increment for a pending note. A future change that permits more concurrent editing must review both assumptions together; continuous-edit behavior has not been verified by this comment pass.

@@ -9,7 +9,8 @@ import type { T } from "../../shared/i18n/i18n";
 
 /**
  * Render only valid policy JSON. Field updates serialize the parsed policy,
- * including schema defaults, back to the parent editor.
+ * including schema defaults, back to the parent editor. Invalid input remains
+ * editable in Manager's advanced JSON field while this form is hidden.
  */
 export function PolicyForm({
   value,

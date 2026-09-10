@@ -1,31 +1,37 @@
-# Shared contracts
+# Contracts: the shared language of the app
 
-## Purpose and boundaries
+Contracts defines the data that Gastwerk's browser and API agree to use. Here, “contract” means an agreement about the shape of data: for example, which fields describe a product or an order item.
 
-Owns Zod catalog/customization/preference schemas, transport-facing types, translated labels and choice/size default normalization. It contains no database access or authoritative price calculation.
+Keeping these definitions together helps the manager form, waiter screens and API use consistent names and value formats.
 
-## Start here
+## What is inside?
 
-- [schemas, types, label and withChoiceDefaults](src/index.ts)
+The entry point is [src/index.ts](src/index.ts).
 
-## Interfaces and dependencies
+- **Schemas** describe and validate ingredients, products, tables, customization input and user preferences. They use Zod, a runtime data-validation library.
+- **TypeScript types** describe data for developers and the compiler, including users, order items, orders and snapshots of calculated items.
+- **Small shared helpers** select translated labels and apply configured choice or serving-size defaults.
 
-API parsers, browser components and config import this source file directly through relative paths. package.json declares workspace globs, but this directory has no individual package manifest/build/export map. Snapshot/Line/Order/User are TypeScript types; not every response has a runtime schema.
+A TypeScript type helps check code during development; it does not validate incoming JSON at runtime. Zod schemas provide runtime checks when a caller invokes them. Some structures, including `Line`, `Order`, `User` and `Snapshot`, currently have types without a matching runtime response schema.
 
-## Behavior and invariants
+## How the applications use it
 
-Quantities and money use decimal strings; customization count is an integer from 1 to 100. Serving size IDs differ from item count. withChoiceDefaults applies configured group defaults and normalizes a single size. Structural validation here is supplemented by reference, availability and state checks in backend services.
+For example, `customizationSchema` describes a selected product, item count, choices, ingredient edits and a note. The browser uses the corresponding `Customization` type, and the API validates submitted customization input. Both use the same definitions, but the API must also check that referenced products and ingredients exist and that the requested operation is allowed.
 
-## Making changes
+The [catalog resolver](../../apps/api/src/catalog/resolve.ts) performs recipe and price calculations. Contracts does not calculate authoritative prices, grant permissions or access the database.
 
-Inspect catalog resolver/save checks, existing stored JSON, config, API and UI callers when changing schemas. Preserve historical snapshot compatibility. Add behavioral tests at the actual consumer, not tests that only duplicate the schema definition.
+The `withChoiceDefaults` helper combines configured group defaults with explicit choices and selects the sole serving size if none was supplied. It does not prove that IDs are valid or calculate ingredient quantities. The `label` helper selects German or English text, falling back to the other translation when needed.
+
+## Important boundaries
+
+Money and ingredient quantities are represented as decimal strings. The number of items in a customization is an integer from 1 to 100; it is different from a serving-size ID or an ingredient quantity.
+
+Changes here can affect both applications, [config](../config/README.md) and previously stored JSON. Inspect callers and historical snapshot compatibility before changing a field or validation rule. Structural checks are supplemented by availability, reference and workflow checks in API services.
 
 ## Verification
 
-[choice and size resolution consumers](../../tests/domain.test.ts); [API validation and historical documents](../../tests/api.integration.test.ts).
+[Domain tests](../../tests/domain.test.ts) exercise choices, serving sizes and invalid customization through the resolver. [API integration tests](../../tests/api.integration.test.ts) exercise validation and historical documents through server operations.
 
-Run `npm test -- tests/domain.test.ts` from `codex/`. Requires the installed root npm dependencies and supported Node runtime; no database is needed. See [canonical setup](../../README.md) and [Milestone 3 execution results](../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+With dependencies installed and the [supported Node runtime](../../README.md#tests-and-checks), run `npm test -- tests/domain.test.ts` from `gastwerk/`; no database is needed. Integration tests require the isolated database described in that guide. Test references are not evidence of a new test run.
 
-## Limitations and related documentation
-
-Use the [architecture map](../../docs/architecture.md) for neighboring modules and the [review findings](../../docs/milestone-3-review.md) for qualified claims.
+Return to the [packages overview](../README.md) or [architecture map](../../docs/architecture.md).

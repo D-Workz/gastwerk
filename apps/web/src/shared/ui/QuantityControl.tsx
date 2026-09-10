@@ -13,6 +13,10 @@ type Props = {
   min?: number;
 };
 
+/**
+ * Callers supply a valid item count and minimum. Buttons limit emitted steps;
+ * this component does not clamp an out-of-range value received through props.
+ */
 export function QuantityControl({
   value,
   onChange,

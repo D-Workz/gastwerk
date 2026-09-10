@@ -44,6 +44,7 @@ export function Order({
   onSend,
   onClose,
 }: Props) {
+  // Keep cancelled lines visible while they still carry unsaved text to recover.
   const active = lines.filter(
     (l) => l.state !== "cancelled" || notes.entries[l.id],
   );

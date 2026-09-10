@@ -73,6 +73,7 @@ export function Manager({
     "ingredient" | "product" | "table" | "configuration" | "stock" | "users"
   >("ingredient");
   const [editor, setEditor] = useState("");
+  // Capture the revision when selecting a record; polling must not silently rebase edits.
   const [version, setVersion] = useState(0);
   const [selected, setSelected] = useState("");
   const [error, setError] = useState("");
@@ -81,6 +82,7 @@ export function Manager({
   const [users, setUsers] = useState<
     { id: string; username: string; role: string; active: boolean }[]
   >([]);
+  // These lists are separate API reads; each new polled state triggers a refresh.
   useEffect(() => {
     if (tab === "stock")
       void api<Movement[]>("/inventory")

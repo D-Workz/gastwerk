@@ -28,7 +28,7 @@ For count/repeat work inspect `repeat.ts`, waiter `Service.tsx`, notes flushing 
 
 [order, repeat, undo, size and history scenarios](../../../../tests/api.integration.test.ts); [note flush and retry behavior](../../../../tests/notes.test.tsx).
 
-Run `npm run test:integration` from `codex/`. Requires the isolated `venue_test` PostgreSQL database; the suite mutates test fixtures. It was inspected, not executed for Milestone 3. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
+Run `npm run test:integration` from `gastwerk/`. Requires the isolated `venue_test` PostgreSQL database; the suite mutates test fixtures. It was inspected, not executed for Milestone 3. See [canonical setup](../../../../README.md) and [Milestone 3 execution results](../../../../docs/milestone-3-review.md) for prerequisites and the distinction between inspected tests and executed checks.
 
 ## Limitations and related documentation
 

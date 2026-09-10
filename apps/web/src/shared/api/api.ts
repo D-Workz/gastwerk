@@ -82,6 +82,11 @@ export async function api<T>(
 }
 
 export type MutationResult = { id?: string };
+/**
+ * Resolves true after a handled success, false after a handled rejection. A lost
+ * acknowledgement may keep the promise pending until Retry finishes; callers
+ * must await it before treating the operation as saved or abandoning busy state.
+ */
 export type Mutate = (
   path: string,
   body: unknown,

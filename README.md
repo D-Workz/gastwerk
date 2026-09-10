@@ -4,6 +4,42 @@ A single-venue restaurant application with persistent ingredient inventory, reci
 
 The business baseline is [spec.md](../instructions/milestone1.md); the active waiter workflow milestone is [Milestone2.md](../instructions/Milestone2.md). See [milestone status](docs/milestone-status.md) for verification and limitations. The project is licensed under the [MIT License](LICENSE).
 
+## How the project fits together
+
+Gastwerk contains two applications and a set of reusable source modules. Everything below is part of Gastwerk; the engineering portfolio lives separately in the outer repository.
+
+| Folder | Purpose | Example |
+| --- | --- | --- |
+| [apps/web](apps/web/README.md) | The React interface running in the browser. | Waiters select tables and dishes; kitchen staff view preparation tickets. |
+| [apps/api](apps/api/README.md) | The server that receives browser requests, checks permissions, applies business rules and accesses PostgreSQL. | Validate an order, calculate its price and save its state. |
+| [packages/contracts](packages/contracts/README.md) | Shared data definitions and structural validation rules. | What a product, customization or order contains. |
+| [packages/config](packages/config/README.md) | Restaurant settings, defaults and server environment schemas. | Pricing-policy options, initial display preferences and branding. |
+| [packages/ui](packages/ui/README.md) | Small reusable React controls used by the browser. | A labeled input (`Field`) and a dialog (`Modal`). |
+
+The browser sends HTTP requests to the API; the API reads and writes PostgreSQL and returns data for the browser to display. The browser does not access the database directly. For example, when a manager saves a product, shared contracts describe its fields, while the API checks permission and business validity before saving it.
+
+`packages/` sits beside `apps/` so shared definitions do not belong to either application. Both applications import contracts and configuration code; UI components currently serve only the browser. These modules are source code included in the applications' builds, not additional running services. Despite the name, they are not separately published npm packages: there are no individual package manifests or independent builds, and imports point directly to their source files.
+
+For the next level of detail, read the [packages overview](packages/README.md), then the individual package guides. The [architecture map](docs/architecture.md) links to the application's other modules. Commands below run from the `gastwerk/` directory.
+
+### Nested documentation for focused work
+
+Gastwerk is organized into modules, with documentation that follows the same structure. This README provides the overall map; application and package READMEs explain the next level; module READMEs describe their purpose, entry points, dependencies and known issues or limitations. Issues that span multiple modules belong in their common parent guide. Small supporting folders are covered by the owning module's README rather than requiring a separate document for every directory.
+
+This nested approach helps people navigate the project and gives coding agents a structured path into a task: start with the overview, follow the relevant module guide, then inspect the affected source and tests. The aim is to reduce unnecessary reading and token consumption by loading context progressively, while still checking connected modules when a change crosses their boundaries. READMEs guide investigation; source code and executed checks establish actual behavior. [AGENTS.md](AGENTS.md) and the [parent repository instructions](../AGENTS.md) define the working rules that support this approach.
+
+### Follow a browser action
+
+The browser's [web app](apps/web/README.md) groups screens into waiter, preparation and manager features. The [API app](apps/api/README.md) groups server work into business modules such as identity, orders, preparation and inventory. These are two applications; individual feature/module folders are not additional servers.
+
+For example, Start preparing sends a request from a browser ticket to the API. The API validates the action and records the preparation change and stock consumption in one transaction. The browser then refreshes its displayed state and also polls while signed in. Read the app guides for folder tables and the complete request journey.
+
+### Shared response contract ownership
+
+The aggregate `AppState` response type currently lives in [web API transport](apps/web/src/shared/api/api.ts), and [API integration tests](tests/api.integration.test.ts) import it from there. The browser trusts received JSON as that type; the complete response has no corresponding runtime schema. This is a confirmed cross-app ownership/validation gap, not evidence that responses are currently malformed.
+
+If the response contract is consolidated later, coordinate its server producer, browser consumers and tests through a shared definition, and decide explicitly where runtime validation belongs. No type move or validation change is included in this documentation work.
+
 ## Start with Docker Compose (local development)
 
 Prerequisites: Docker Engine with Docker Compose, available localhost port 5173 and PostgreSQL port 5432. No host Node installation is needed for Compose.
