@@ -99,9 +99,12 @@ Stop the Compose web/API services first if they occupy your development ports: `
 
 ## Tests and checks
 
-Create isolated test databases once. Integration tests refuse to run against a URL that does not contain `venue_test`. Browser setup resets **only** `venue_e2e` and never the normal `venue` database. Do not run test suites concurrently against the same test database.
+See the [test overview](tests/README.md) for the test types, file map and how each suite works.
+
+From `gastwerk/`, start PostgreSQL and create isolated test databases once. Integration tests refuse to run against a URL that does not contain `venue_test`. Browser setup resets **only** `venue_e2e` and never the normal `venue` database. Do not run test suites concurrently against the same test database.
 
 ```sh
+docker compose up -d --wait db
 docker compose exec db createdb -U venue venue_test
 docker compose exec db createdb -U venue venue_e2e
 npx playwright install chromium
